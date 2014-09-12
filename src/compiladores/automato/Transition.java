@@ -81,6 +81,11 @@ public class Transition {
     }
 
     @Override
+    public String toString() {
+        return "Transition{" + "origin=" + origin + ", destiny=" + destiny + ", symbol=" + symbol + ", symbolPrimitiva=" + symbolPrimitiva + ", consume=" + consume + '}';
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (obj == null) {
             return false;

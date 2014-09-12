@@ -45,7 +45,7 @@ public class IdentificadorTest {
     @Test
     public void testGetPrimitiva() {
         System.out.println("getPrimitiva");
-        char a = ';';
+        char a = '_';
         Primitiva expResult = Primitiva.SIMBOLO;
         Primitiva result = Identificador.getPrimitiva(a);
         assertEquals(expResult, result);        

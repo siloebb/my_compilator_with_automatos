@@ -7,6 +7,6 @@ package compiladores.enums;
  */
 public enum Primitiva {
     
-    LETRA, DIGITO, SIMBOLO, ESPACO, OUTROS;
+    LAMBIDA, LETRA, DIGITO, SIMBOLO, ESPACO, OUTROS;
     
 }

@@ -21,6 +21,7 @@ public class State {
     private String label;
     private Token token;
     private Erro erro;
+    private boolean principal;
 
     public int getId() {
         return id;
@@ -62,6 +63,25 @@ public class State {
         this.erro = erro;
     }
 
+    public boolean isPrincipal() {
+        return principal;
+    }
+
+    public void setPrincipal(boolean principal) {
+        this.principal = principal;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 53 * hash + this.id;
+        hash = 53 * hash + Objects.hashCode(this.name);
+        hash = 53 * hash + Objects.hashCode(this.label);
+        hash = 53 * hash + Objects.hashCode(this.erro);
+        hash = 53 * hash + (this.principal ? 1 : 0);
+        return hash;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -80,16 +100,21 @@ public class State {
         if (!Objects.equals(this.label, other.label)) {
             return false;
         }
+        if (!Objects.equals(this.token, other.token)) {
+            return false;
+        }
+        if (!Objects.equals(this.erro, other.erro)) {
+            return false;
+        }
+        if (this.principal != other.principal) {
+            return false;
+        }
         return true;
     }
 
     @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 71 * hash + this.id;
-        hash = 71 * hash + Objects.hashCode(this.name);
-        hash = 71 * hash + Objects.hashCode(this.label);
-        return hash;
+    public String toString() {
+        return "State{" + "id=" + id + ", name=" + name + ", label=" + label + ", token=" + token + ", erro=" + erro + ", principal=" + principal + '}';
     }
     
 }

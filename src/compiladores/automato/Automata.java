@@ -35,6 +35,14 @@ public class Automata {
         s.setLabel("q" + id);
         states.put(id, s);
     }
+    
+    public void setState(int id, boolean principal) {
+        State s = new State();
+        s.setId(id);
+        s.setLabel("q" + id);
+        s.setPrincipal(principal);
+        states.put(id, s);
+    }
 
     public void setState(int id, Token tot) {
         State s = new State();
@@ -83,13 +91,12 @@ public class Automata {
     public Transition getTransition(int origin, String symbol) {
         State stateOrigin = states.get(origin);
         for (Transition transition : transitions) {
-            try {
+            if (transition.getSymbol() != null) {
                 if ((transition.getOrigin().equals(stateOrigin)) && (transition.getSymbol().equals(symbol))) {
                     return transition;
                 }
-            } catch (NullPointerException e) {
-                return null;
             }
+
         }
         return null;
     }
@@ -97,8 +104,23 @@ public class Automata {
     public Transition getTransition(int origin, Primitiva symbol) {
         State stateOrigin = states.get(origin);
         for (Transition transition : transitions) {
-            if ((transition.getOrigin().equals(stateOrigin)) && (transition.getSymbolPrimitiva().equals(symbol))) {
-                return transition;
+            if (transition.getSymbolPrimitiva() != null) {
+                if ((transition.getOrigin().equals(stateOrigin)) && (transition.getSymbolPrimitiva().equals(symbol))) {
+                    return transition;
+                }
+            }
+        }
+        return null;
+    }
+
+    public Transition getTransitionLambda(int origin) {
+        State stateOrigin = states.get(origin);
+        for (Transition transition : transitions) {
+            if (transition.getSymbolPrimitiva() != null) {
+                if ((transition.getOrigin().equals(stateOrigin))
+                        && (transition.getSymbolPrimitiva().equals(Primitiva.LAMBIDA))) {
+                    return transition;
+                }
             }
         }
         return null;
@@ -138,49 +160,90 @@ public class Automata {
 
     public void executeAutomata(String texto, ArrayList<Erro> listaErros, ArrayList<Token> listaTokens) {
         try {
-            int i = 0;
+
             int origin = 0;
 
             String[] lines = texto.split("\n");
+            for (String strings : lines) {
+                strings = strings + "\n";
+            }
+
+            String tempToken = "";
+
             for (int c = 0; lines.length > c; c++) {
                 String linha = lines[c];
-
+                System.out.println("Estou na linha " + c);
+                int i = 0;
                 while (i < linha.length()) {
                     //if (!(("" + linha.charAt(i)).equals(""))) {
 
-                        char charAt = linha.charAt(i);
+                    char charAt = linha.charAt(i);
 
-                        Transition transition = getTransition(origin, "" + charAt);
-                        if (transition == null) {
-                            Primitiva primitiva = Identificador.getPrimitiva(charAt);
-                            transition = getTransition(origin, primitiva);
-                        }
+                    //Pegando a transição, a prioridade é de um catactere especifico
+                    Transition transition = null;
+                    //transition = getTransitionLambda(origin);
+                    if (transition == null) {
+                        transition = getTransition(origin, "" + charAt);
+                    }
+                    if (transition == null) {
+                        Primitiva primitiva = Identificador.getPrimitiva(charAt);
+                        transition = getTransition(origin, primitiva);
+                    }
 
-                        if (transition == null) {
-                            throw new NoDestinyToSymbolException("Sem destino para o simbolo \'"
-                                    + charAt + "\' no estado " + getState(origin).getLabel());
-                        }
+                    tempToken += charAt;
 
-                        State destiny = transition.getDestiny();
+                    if (transition == null) {
+                        throw new NoDestinyToSymbolException("Sem destino para o simbolo \'"
+                                + charAt + "\' no estado " + getState(origin).getLabel());
+                    }
 
-                        if (destiny.getToken() != null) {
-                            System.out.println("" + destiny.getToken());
-                            destiny.getToken().setLexema("" + charAt);
-                            destiny.getToken().setLinha(i);
-                            listaTokens.add(destiny.getToken());
-                        }
-                        if (destiny.getErro() != null) {
-                            destiny.getErro().setLinha(i);
-                            listaErros.add(destiny.getErro());
-                        }
+                    //Pegando estado destino
+                    State destiny = transition.getDestiny();
 
-                        origin = destiny.getId();
+                    //Verificando se o estado irá informar alguma informação
+                    if (destiny.getToken() != null) {
+                        System.out.println("" + destiny.getToken());
+                        destiny.getToken().setLexema("" + tempToken.trim());
+                        destiny.getToken().setLinha(c);
+                        listaTokens.add(destiny.getToken());
+                        destiny.setToken(new Token(destiny.getToken().getTipoToken()));
+                    }
+                    if (destiny.getErro() != null) {
+                        destiny.getErro().setLinha(i);
+                        listaErros.add(destiny.getErro());
+                    }
 
-                        System.out.println("Leu o simbolo \" " + charAt + " \" foi para o "
-                                + this.getState(origin).getLabel());
+                    //Mudando nova origem
+                    origin = destiny.getId();
 
-                    //}
+                    System.out.println("Leu o simbolo \" " + charAt + " \" foi para o "
+                            + this.getState(origin).getLabel());
+
+                    //reiniciando o armazenador de token
+                    if (this.getState(origin).isPrincipal()) {
+                        tempToken = "";
+                    }
+
                     i++;
+
+                    //Verificando transições lambdas
+                    while (true) {
+                        //State stateOrigin = this.getState(origin);
+                        Transition transitionLambda = getTransitionLambda(origin);
+
+                        if (transitionLambda != null) {
+                            origin = transitionLambda.getDestiny().getId();
+                            System.out.println("Transição lambda, passando para estado "
+                                    + this.getState(origin).getLabel());
+                            //reiniciando o armazenador de token para lambidas
+                            if (this.getState(origin).isPrincipal()) {
+                                tempToken = "";
+                            }
+                        } else {
+                            break;
+                        }
+                    }
+
                 }
             }
 
