@@ -16,21 +16,19 @@ public class Compilador {
     private Automata automata;
     private ArrayList<Erro> listaErros;
     private ArrayList<Token> listaTokens;
-    
 
-    public Compilador() {        
+    public Compilador() {
         iniciarAutomata();
     }
 
     public void iniciarAutomata() {
 
-        System.out.println("Iniciando Automata...");        
-        
+        System.out.println("Iniciando Automata...");
+
         automata = new Automata();
-        
+
         setStates(automata);
         setTransitions(automata);
-        
 
         System.out.println("Automata iniciada!");
 
@@ -40,10 +38,10 @@ public class Compilador {
     public void executar(String texto) {
         listaErros = new ArrayList<>();
         listaTokens = new ArrayList<>();
-        
+
         automata.executeAutomata(texto, listaErros, listaTokens);
         for (Token token : listaTokens) {
-            if(Identificador.verificarPalavraReservada(token.getLexema())){
+            if (Identificador.verificarPalavraReservada(token.getLexema())) {
                 token.setTipoToken(TipoToken.PALAVRA_RESERVADA);
             }
         }
@@ -64,81 +62,81 @@ public class Compilador {
     public void setListaTokens(ArrayList<Token> listaTokens) {
         this.listaTokens = listaTokens;
     }
-    
-    public void setStates(Automata automata){
-       automata.setState(0,true);
+
+    public void setStates(Automata automata) {
+        automata.setState(0, true);
 //       automata.setState(1);
 //       automata.setState(2, new Token(TipoToken.IDENTIFICADOR));
 //       automata.setState(3, new Erro(TipoErro.IDENTIFICADOR_MAL_FORMADO));
 //       automata.setState(4);
-       automata.setStartState(1);
-       automata.setStartState(2);
-       automata.setStartState(3);
-       automata.setStartState(4);
-       automata.setStartState(5);
-       automata.setStartState(6);
-       automata.setStartState(7);
-       automata.setStartState(8);
-       automata.setStartState(9);
-       
-       automata.setStartState(10);       
-       automata.setStartState(11);
-       automata.setStartState(12);
-       automata.setStartState(13);
-       automata.setStartState(14);
-       automata.setStartState(15);
-       automata.setStartState(16);
-       automata.setStartState(17);
-       automata.setStartState(18);
-       automata.setStartState(19);
-       
-       automata.setStartState(20);       
-       automata.setStartState(21);
-       automata.setStartState(22);
-       automata.setStartState(23);
-       automata.setStartState(24);
-       automata.setStartState(25);
-       automata.setStartState(26);
-       automata.setStartState(27);
-       automata.setStartState(28);
-       automata.setStartState(29);
-       
-       automata.setStartState(30);       
-       automata.setStartState(31);
-       automata.setStartState(32);
-       automata.setStartState(33);
-       automata.setStartState(34);
-       automata.setStartState(35);
-       automata.setStartState(36);
-       automata.setStartState(37);
-       automata.setStartState(38);
-       automata.setStartState(39);
-       
-       automata.setStartState(40);       
-       automata.setStartState(41);
-       automata.setStartState(42);
-       automata.setStartState(43);
-       automata.setStartState(44);
-       automata.setStartState(45);
-       automata.setStartState(46);
-       automata.setStartState(47);
-       automata.setStartState(48);
-       automata.setStartState(49);
-       
-       automata.setStartState(50);       
-       automata.setStartState(51);
-       automata.setStartState(52);
-       automata.setStartState(53);
-       automata.setStartState(54);
-       automata.setStartState(55);
-       automata.setStartState(56);
-       automata.setStartState(57);
-       automata.setStartState(58);
-       automata.setStartState(59);
-       
-       automata.setStartState(0);
-       automata.setFinalstate(0);
-       
+        automata.setState(1);
+        automata.setState(2, new Token(TipoToken.IDENTIFICADOR));
+        automata.setState(3, new Erro(TipoErro.IDENTIFICADOR_MAL_FORMADO));
+        automata.setState(4);
+        automata.setState(5);
+        automata.setState(6, new Token(TipoToken.NUMERO_REAL));
+        automata.setState(7, new Token(TipoToken.NUMERO_INTEIRO));
+        automata.setState(8, new Erro(TipoErro.NUMERO_MAL_FORMADO));
+        automata.setState(9);
+
+        automata.setState(10, new Token(TipoToken.CADEIA_CONSTANTE));
+        automata.setState(11, new Erro(TipoErro.CADEIA_INCOMPLETA));
+        automata.setState(12, new Erro(TipoErro.SIMBOLO_NAO_IDENTIFICADO));
+        automata.setState(13);
+        automata.setState(14);
+        automata.setState(15, new Erro(TipoErro.CARACTERE_VAZIO));
+        automata.setState(16, new Erro(TipoErro.SIMBOLO_NAO_IDENTIFICADO));
+        automata.setState(17, new Erro(TipoErro.SIMBOLO_NAO_IDENTIFICADO));
+        automata.setState(18, new Erro(TipoErro.CADEIA_INCOMPLETA));
+        automata.setState(19, new Token(TipoToken.CARACTERE_CONSTANTE));
+
+        automata.setState(20, new Erro(TipoErro.QUANTIDADE_DE_CARACTERES_INVALIDO));
+        automata.setState(21, new Token(TipoToken.DELIMITADOR_FIM_LINHA));
+        automata.setState(22, new Token(TipoToken.DELIMITADOR_SEPARADOR));
+        automata.setState(23, new Token(TipoToken.DELIMITADOR_ABRIR_PARENTESE));
+        automata.setState(24, new Token(TipoToken.DELIMITADOR_FECHAR_PARENTESE));
+        automata.setState(25, new Token(TipoToken.DELIMITADOR_ABRIR_CHAVES));
+        automata.setState(26, new Token(TipoToken.DELIMITADOR_FECHAR_CHAVES));
+        automata.setState(27, new Token(TipoToken.DELIMITADOR_ABRIR_COLCHETE));
+        automata.setState(28, new Token(TipoToken.DELIMITADOR_FECHAR_COLCHETE));
+        automata.setState(29);
+
+        automata.setState(30);
+        automata.setState(31);
+        automata.setState(32, new Token(TipoToken.COMENTARIO));
+        automata.setState(33);
+        automata.setState(34, new Token(TipoToken.COMENTARIO));
+        automata.setState(35, new Token(TipoToken.OPERADOR_ARITMETICO_BINARIO));
+        automata.setState(36);
+        automata.setState(37, new Token(TipoToken.OPERADOR_ARITMETICO_UNARIO));
+        automata.setState(38, new Token(TipoToken.OPERADOR_ARITMETICO_BINARIO));
+        automata.setState(39, new Erro(TipoErro.SIMBOLO_NAO_IDENTIFICADO));
+
+        automata.setState(40);
+        automata.setState(41, new Token(TipoToken.OPERADOR_ARITMETICO_UNARIO));
+        automata.setState(42, new Token(TipoToken.OPERADOR_ARITMETICO_BINARIO));
+        automata.setState(43);
+        automata.setState(44, new Token(TipoToken.OPERADOR_ARITMETICO_BINARIO));
+        automata.setState(45);
+        automata.setState(46, new Token(TipoToken.OPERADOR_ARITMETICO_ATRIBUICAO));
+        automata.setState(47, new Token(TipoToken.OPERADOR_RELACIONAL));
+        automata.setState(48);
+        automata.setState(49, new Token(TipoToken.OPERADOR_RELACIONAL));
+
+        automata.setState(50, new Token(TipoToken.OPERADOR_RELACIONAL));
+        automata.setState(51);
+        automata.setState(52, new Token(TipoToken.OPERADOR_ARITMETICO_LOGICO));
+        automata.setState(53, new Erro(TipoErro.OPERADOR_MAL_FORMADO));
+        automata.setState(54);
+        automata.setState(55, new Token(TipoToken.OPERADOR_ARITMETICO_LOGICO));
+        automata.setState(56);
+        automata.setState(57, new Token(TipoToken.OPERADOR_ARITMETICO_ACESSO));
+        automata.setState(58, new Erro(TipoErro.OPERADOR_MAL_FORMADO));
+        automata.setState(59, new Erro(TipoErro.SIMBOLO_NAO_IDENTIFICADO));
+
+        automata.setStartState(0);
+        automata.setFinalstate(0);
+
     }
 
     private void setTransitions(Automata automata) {
@@ -154,8 +152,7 @@ public class Compilador {
         automata.setTransition(1, 3, Primitiva.OUTROS);
         automata.setTransition(2, 0, Primitiva.LAMBIDA);
         automata.setTransition(3, 0, Primitiva.LAMBIDA);
-        
-       
+
     }
 
 }
