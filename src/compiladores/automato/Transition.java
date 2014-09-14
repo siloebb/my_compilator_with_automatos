@@ -13,7 +13,7 @@ public class Transition {
     private State destiny;
     private String symbol;
     private Primitiva symbolPrimitiva;
-    private boolean consume;
+    private boolean consume = true;
 
     public Transition(State origin, State destiny) {
         this.origin = origin;

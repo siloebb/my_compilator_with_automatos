@@ -35,7 +35,7 @@ public class Automata {
         s.setLabel("q" + id);
         states.put(id, s);
     }
-    
+
     public void setState(int id, boolean principal) {
         State s = new State();
         s.setId(id);
@@ -79,11 +79,31 @@ public class Automata {
         transitions.add(t);
     }
 
+    public void setTransition(int origin, int destiny, String symbol, boolean consume) {
+        State stateOrigin = states.get(origin);
+        State stateDestiny = states.get(destiny);
+        Transition t = new Transition(stateOrigin, stateDestiny);
+        t.setSymbol(symbol);
+        t.setConsume(consume);
+
+        transitions.add(t);
+    }
+
     public void setTransition(int origin, int destiny, Primitiva symbol) {
         State stateOrigin = states.get(origin);
         State stateDestiny = states.get(destiny);
         Transition t = new Transition(stateOrigin, stateDestiny);
         t.setSymbol(symbol);
+
+        transitions.add(t);
+    }
+
+    public void setTransition(int origin, int destiny, Primitiva symbol, boolean consume) {
+        State stateOrigin = states.get(origin);
+        State stateDestiny = states.get(destiny);
+        Transition t = new Transition(stateOrigin, stateDestiny);
+        t.setSymbol(symbol);
+        t.setConsume(consume);
 
         transitions.add(t);
     }
@@ -164,9 +184,9 @@ public class Automata {
             int origin = 0;
 
             String[] lines = texto.split("\n");
-            for (String strings : lines) {
-                strings = strings + "\n";
-            }
+//            for (String strings : lines) {
+//                strings = strings + "¿";
+//            }
 
             String tempToken = "";
 
@@ -174,8 +194,11 @@ public class Automata {
                 String linha = lines[c];
                 System.out.println("Estou na linha " + c);
                 int i = 0;
+
+                //Adicionando símbolo de enter
+                linha = linha + "¶";
+
                 while (i < linha.length()) {
-                    //if (!(("" + linha.charAt(i)).equals(""))) {
 
                     char charAt = linha.charAt(i);
 
@@ -202,15 +225,17 @@ public class Automata {
 
                     //Verificando se o estado irá informar alguma informação
                     if (destiny.getToken() != null) {
-                        System.out.println("" + destiny.getToken());
+                        //System.out.println("" + destiny.getToken());
                         destiny.getToken().setLexema("" + tempToken.trim());
                         destiny.getToken().setLinha(c);
                         listaTokens.add(destiny.getToken());
                         destiny.setToken(new Token(destiny.getToken().getTipoToken()));
                     }
                     if (destiny.getErro() != null) {
-                        destiny.getErro().setLinha(i);
+                        destiny.getErro().setLexema("" + tempToken.trim());
+                        destiny.getErro().setLinha(c);
                         listaErros.add(destiny.getErro());
+                        destiny.setErro(new Erro(destiny.getErro().getTipoErro()));
                     }
 
                     //Mudando nova origem
@@ -224,7 +249,9 @@ public class Automata {
                         tempToken = "";
                     }
 
-                    i++;
+                    if (transition.isConsume()) {
+                        i++;
+                    }
 
                     //Verificando transições lambdas
                     while (true) {
@@ -243,8 +270,9 @@ public class Automata {
                             break;
                         }
                     }
-
                 }
+                //Se recuperando
+
             }
 
             State ultimoState = finalStates.get(origin);
@@ -252,6 +280,7 @@ public class Automata {
                 System.out.println("Terminou em um estado final");
             } else {
                 System.out.println("Terminou em um estado não-final");
+
                 throw new NoFinishiInFinalStateException("O automato não terminou em um estado final!");
             }
 
