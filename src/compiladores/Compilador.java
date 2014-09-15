@@ -73,6 +73,7 @@ public class Compilador {
         automata.setState(2, new Token(TipoToken.IDENTIFICADOR));
         automata.setState(3, new Erro(TipoErro.IDENTIFICADOR_MAL_FORMADO));
         automata.setState(4);
+        automata.setState(91);
         automata.setState(5);
         automata.setState(6, new Token(TipoToken.NUMERO_REAL));
         automata.setState(7, new Token(TipoToken.NUMERO_INTEIRO));
@@ -154,14 +155,20 @@ public class Compilador {
         automata.setTransition(1, 2, Primitiva.ESPACO, false);
         automata.setTransition(1, 2, Primitiva.FIM_DE_LINHA, false);
         automata.setTransition(1, 2, Primitiva.SIMBOLO, false);
+        automata.setTransition(1, 2, Primitiva.OUTROS, false);
         automata.setTransition(1, 3, "\"", false);
         automata.setTransition(1, 3, "\'", false);
         automata.setTransition(2, 0, Primitiva.LAMBIDA);
         automata.setTransition(3, 0, Primitiva.LAMBIDA);
         //NUMEROS
         automata.setTransition(0, 4, Primitiva.DIGITO);
-        automata.setTransition(4, 5, Primitiva.DIGITO);
-        automata.setTransition(4, 5, ".");
+        automata.setTransition(4, 4, Primitiva.DIGITO);
+        automata.setTransition(4, 91, ".");
+        automata.setTransition(91, 5, Primitiva.DIGITO);
+        automata.setTransition(91, 8, Primitiva.LETRA);
+        automata.setTransition(91, 8, Primitiva.SIMBOLO);
+        automata.setTransition(91, 8, Primitiva.ESPACO, false);
+        automata.setTransition(91, 8, Primitiva.FIM_DE_LINHA, false);
         automata.setTransition(4, 7, Primitiva.ESPACO, false);
         automata.setTransition(4, 7, Primitiva.FIM_DE_LINHA, false);
         automata.setTransition(4, 7, Primitiva.SIMBOLO, false);
@@ -240,6 +247,7 @@ public class Compilador {
         automata.setTransition(29, 35, Primitiva.LETRA, false);
         automata.setTransition(29, 35, Primitiva.DIGITO, false);
         automata.setTransition(29, 35, Primitiva.ESPACO, false);
+        automata.setTransition(29, 39, Primitiva.OUTROS);
         automata.setTransition(30, 30, Primitiva.LETRA);
         automata.setTransition(30, 30, Primitiva.SIMBOLO);
         automata.setTransition(30, 30, Primitiva.DIGITO);
@@ -270,6 +278,7 @@ public class Compilador {
         automata.setTransition(36, 38, Primitiva.SIMBOLO, false);
         automata.setTransition(36, 38, Primitiva.LETRA, false);
         automata.setTransition(36, 38, Primitiva.ESPACO, false);
+        //automata.setTransition(36, 38, Primitiva.FIM_DE_LINHA, false);
         automata.setTransition(36, 39, Primitiva.OUTROS);
         automata.setTransition(37, 0, Primitiva.LAMBIDA);
         automata.setTransition(38, 0, Primitiva.LAMBIDA);
@@ -335,7 +344,7 @@ public class Compilador {
         automata.setTransition(53, 0, Primitiva.LAMBIDA);
         
         automata.setTransition(0, 54, "&");
-        automata.setTransition(54, 55, "|");
+        automata.setTransition(54, 55, "&");
         automata.setTransition(54, 53, Primitiva.DIGITO, false);
         automata.setTransition(54, 53, Primitiva.SIMBOLO, false);
         automata.setTransition(54, 53, Primitiva.LETRA, false);
@@ -345,9 +354,11 @@ public class Compilador {
         automata.setTransition(55, 0, Primitiva.LAMBIDA);
         
         automata.setTransition(0, 56, ".");
-        automata.setTransition(56, 57, Primitiva.LETRA);
-        automata.setTransition(56, 58, Primitiva.DIGITO);
-        automata.setTransition(56, 58, Primitiva.SIMBOLO);
+        automata.setTransition(56, 57, Primitiva.LETRA, false);
+        automata.setTransition(56, 58, Primitiva.DIGITO, false);
+        automata.setTransition(56, 58, Primitiva.SIMBOLO, false);
+        automata.setTransition(56, 58, Primitiva.ESPACO);
+        automata.setTransition(56, 58, Primitiva.FIM_DE_LINHA);
         automata.setTransition(57, 0, Primitiva.LAMBIDA);
         automata.setTransition(58, 0, Primitiva.LAMBIDA);
         
