@@ -13,7 +13,6 @@ import compiladores.utils.TextLineNumber;
 import compiladores.utils.TokenTableModel;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
-import javax.swing.JTable;
 
 /**
  *
@@ -29,6 +28,7 @@ public class FrameMain extends javax.swing.JFrame {
      */
     public FrameMain() {
         initComponents();
+        this.setTitle("Compilador Super-Legal de  Silo");
         tln = new TextLineNumber(taCodigo);
         spCodigo.setRowHeaderView(tln);
         compilador = new Compilador();
@@ -56,7 +56,9 @@ public class FrameMain extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
+        btnCompilar.setMnemonic('c');
         btnCompilar.setText("Compilar");
+        btnCompilar.setToolTipText("Clique aqui para compilar");
         btnCompilar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCompilarActionPerformed(evt);

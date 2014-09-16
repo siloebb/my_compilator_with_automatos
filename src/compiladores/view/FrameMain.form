@@ -87,7 +87,9 @@
   <SubComponents>
     <Component class="javax.swing.JButton" name="btnCompilar">
       <Properties>
+        <Property name="mnemonic" type="int" value="99"/>
         <Property name="text" type="java.lang.String" value="Compilar"/>
+        <Property name="toolTipText" type="java.lang.String" value="Clique aqui para compilar"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnCompilarActionPerformed"/>
