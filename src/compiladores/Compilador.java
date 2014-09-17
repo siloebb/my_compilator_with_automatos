@@ -188,6 +188,7 @@ public class Compilador {
         automata.setTransition(9, 9, Primitiva.LETRA);
         automata.setTransition(9, 9, Primitiva.DIGITO);
         automata.setTransition(9, 9, Primitiva.SIMBOLO);
+        automata.setTransition(9, 9, Primitiva.ESPACO);
         automata.setTransition(9, 10, "\"");
         automata.setTransition(9, 11, Primitiva.FIM_DE_LINHA);
         automata.setTransition(9, 12, Primitiva.OUTROS);
