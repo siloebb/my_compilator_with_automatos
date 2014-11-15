@@ -43,7 +43,8 @@ public class Token {
 
     @Override
     public String toString() {
-        return "Token{" + "tipoToken=" + tipoToken + ", lexema=" + lexema + ", linha=" + linha + '}';
+        //return "Token{" + "tipoToken=" + tipoToken + ", lexema=" + lexema + ", linha=" + linha + '}';
+        return "" + lexema;
     }
     
 }

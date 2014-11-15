@@ -4,6 +4,11 @@ import compiladores.automato.Automata;
 import compiladores.enums.Primitiva;
 import compiladores.enums.TipoErro;
 import compiladores.enums.TipoToken;
+import compiladores.sintatico.AnalisadorSintatico;
+import compiladores.sintatico.EditorDeNaoTerminais;
+import compiladores.sintatico.ErroSintatico;
+import compiladores.sintatico.ExecutorNaoTerminal;
+import compiladores.sintatico.NaoTerminal;
 import compiladores.utils.Identificador;
 import java.util.ArrayList;
 
@@ -14,8 +19,10 @@ import java.util.ArrayList;
 public class Compilador {
 
     private Automata automata;
-    private ArrayList<Erro> listaErros;
+    private ArrayList<Erro> listaErrosLexicos;
+    private ArrayList<ErroSintatico> listaErrosSintaticos;
     private ArrayList<Token> listaTokens;
+    private AnalisadorSintatico analisadorSintatico;
 
     public Compilador() {
         iniciarAutomata();
@@ -36,32 +43,65 @@ public class Compilador {
     }
 
     public void executar(String texto) {
-        listaErros = new ArrayList<>();
+        //Analise Léxica
+        listaErrosLexicos = new ArrayList<>();
         listaTokens = new ArrayList<>();
 
-        automata.executeAutomata(texto, listaErros, listaTokens);
+        automata.executeAutomata(texto, listaErrosLexicos, listaTokens);
         for (Token token : listaTokens) {
             if (Identificador.verificarPalavraReservada(token.getLexema())) {
                 token.setTipoToken(TipoToken.PALAVRA_RESERVADA);
             }
         }
+
+        //Analise Sintática
+        //removendo comentários
+        ArrayList<Token> listaTokensSintatico = new ArrayList<>();
+        listaTokensSintatico.addAll(listaTokens);
+        
+        int i = 0;
+        while (i < listaTokensSintatico.size()) {
+            Token token = listaTokensSintatico.get(i);
+            if (token.getTipoToken() == TipoToken.COMENTARIO) {
+                listaTokensSintatico.remove(i);
+            } else {
+                i++;
+            }
+        }
+
+        analisadorSintatico = new AnalisadorSintatico(listaTokensSintatico);
+
+        listaErrosSintaticos = EditorDeNaoTerminais.setNaoTerminais(analisadorSintatico);
+        
+        
+        analisadorSintatico.setStarter(analisadorSintatico.getListaNaoTerminal().get("lista_registros"));
+        analisadorSintatico.executar();
+
     }
 
+    
+
     public ArrayList<Erro> getListaErros() {
-        return listaErros;
+        return listaErrosLexicos;
     }
 
     public void setListaErros(ArrayList<Erro> listaErros) {
-        this.listaErros = listaErros;
+        this.listaErrosLexicos = listaErros;
     }
 
     public ArrayList<Token> getListaTokens() {
         return listaTokens;
     }
 
+    public ArrayList<ErroSintatico> getListaErrosSintaticos() {
+        return listaErrosSintaticos;
+    }
+
     public void setListaTokens(ArrayList<Token> listaTokens) {
         this.listaTokens = listaTokens;
     }
+    
+    
 
     public void setStates(Automata automata) {
         automata.setState(0, true);
@@ -134,19 +174,21 @@ public class Compilador {
         automata.setState(57, new Token(TipoToken.OPERADOR_ARITMETICO_ACESSO));
         automata.setState(58, new Erro(TipoErro.OPERADOR_MAL_FORMADO));
         automata.setState(59, new Erro(TipoErro.SIMBOLO_NAO_IDENTIFICADO));
+        
+        automata.setState(80);
 
         automata.setStartState(0);
         automata.setFinalstate(0);
 
     }
 
-    private void setTransitions(Automata automata) {       
+    private void setTransitions(Automata automata) {
         automata.setTransition(0, 0, Primitiva.FIM_DE_LINHA);
         automata.setTransition(0, 0, Primitiva.ESPACO);
         automata.setTransition(0, 59, Primitiva.SIMBOLO);
         automata.setTransition(0, 17, Primitiva.OUTROS);
         automata.setTransition(17, 0, Primitiva.LAMBIDA);
-        
+
         //IDENTIFICADOR
         automata.setTransition(0, 1, Primitiva.LETRA);
         automata.setTransition(1, 1, Primitiva.LETRA);
@@ -182,7 +224,7 @@ public class Compilador {
         automata.setTransition(6, 0, Primitiva.LAMBIDA);
         automata.setTransition(7, 0, Primitiva.LAMBIDA);
         automata.setTransition(8, 0, Primitiva.LAMBIDA);
-        
+
         //CADEIA CONSTANTE
         automata.setTransition(0, 9, "\"");
         automata.setTransition(9, 9, Primitiva.LETRA);
@@ -195,12 +237,13 @@ public class Compilador {
         automata.setTransition(10, 0, Primitiva.LAMBIDA);
         automata.setTransition(11, 0, Primitiva.LAMBIDA);
         automata.setTransition(12, 0, Primitiva.LAMBIDA);
-        
+
         //CARACTERE CONSTANTE
         automata.setTransition(0, 13, "\'");
         automata.setTransition(13, 14, Primitiva.LETRA);
         automata.setTransition(13, 14, Primitiva.DIGITO);
-        automata.setTransition(13, 14, Primitiva.SIMBOLO);        
+        automata.setTransition(13, 14, Primitiva.SIMBOLO);
+        automata.setTransition(13, 14, " ");
         automata.setTransition(13, 15, "\'");
         automata.setTransition(13, 16, Primitiva.OUTROS);
         automata.setTransition(14, 19, "\'");
@@ -208,7 +251,7 @@ public class Compilador {
         automata.setTransition(14, 18, Primitiva.LETRA);
         automata.setTransition(14, 18, Primitiva.DIGITO);
         automata.setTransition(14, 18, Primitiva.SIMBOLO);
-        automata.setTransition(15, 0, Primitiva.LAMBIDA);        
+        automata.setTransition(15, 0, Primitiva.LAMBIDA);
         automata.setTransition(16, 16, Primitiva.LETRA);
         automata.setTransition(16, 16, Primitiva.DIGITO);
         automata.setTransition(16, 16, Primitiva.SIMBOLO);
@@ -216,12 +259,12 @@ public class Compilador {
         automata.setTransition(16, 14, Primitiva.LAMBIDA);
         automata.setTransition(18, 18, Primitiva.LETRA);
         automata.setTransition(18, 18, Primitiva.DIGITO);
-        automata.setTransition(18, 18, Primitiva.SIMBOLO);        
+        automata.setTransition(18, 18, Primitiva.SIMBOLO);
         automata.setTransition(18, 20, "\'");
         automata.setTransition(18, 17, Primitiva.OUTROS);
         automata.setTransition(19, 0, Primitiva.LAMBIDA);
         automata.setTransition(20, 0, Primitiva.LAMBIDA);
-        
+
         //DELIMITADORES
         automata.setTransition(0, 21, ";");
         automata.setTransition(0, 22, ",");
@@ -231,7 +274,8 @@ public class Compilador {
         automata.setTransition(0, 26, "}");
         automata.setTransition(0, 27, "[");
         automata.setTransition(0, 28, "]");
-        
+        automata.setTransition(0, 80, "!");
+
         automata.setTransition(21, 0, Primitiva.LAMBIDA);
         automata.setTransition(22, 0, Primitiva.LAMBIDA);
         automata.setTransition(23, 0, Primitiva.LAMBIDA);
@@ -240,7 +284,7 @@ public class Compilador {
         automata.setTransition(26, 0, Primitiva.LAMBIDA);
         automata.setTransition(27, 0, Primitiva.LAMBIDA);
         automata.setTransition(28, 0, Primitiva.LAMBIDA);
-        
+
         //OPERADORES
         automata.setTransition(0, 29, "/");
         automata.setTransition(29, 30, "*");
@@ -256,6 +300,7 @@ public class Compilador {
         automata.setTransition(30, 30, Primitiva.ESPACO);
         automata.setTransition(30, 30, Primitiva.FIM_DE_LINHA);
         automata.setTransition(30, 31, "*");
+        automata.setTransition(31, 31, "*");
         automata.setTransition(31, 30, Primitiva.LETRA);
         automata.setTransition(31, 30, Primitiva.SIMBOLO);
         automata.setTransition(31, 30, Primitiva.DIGITO);
@@ -272,7 +317,7 @@ public class Compilador {
         automata.setTransition(33, 34, Primitiva.FIM_DE_LINHA);
         automata.setTransition(34, 0, Primitiva.LAMBIDA);
         automata.setTransition(35, 0, Primitiva.LAMBIDA);
-        
+
         automata.setTransition(0, 36, "+");
         automata.setTransition(36, 37, "+");
         automata.setTransition(36, 38, Primitiva.DIGITO, false);
@@ -284,7 +329,7 @@ public class Compilador {
         automata.setTransition(37, 0, Primitiva.LAMBIDA);
         automata.setTransition(38, 0, Primitiva.LAMBIDA);
         automata.setTransition(39, 0, Primitiva.LAMBIDA);
-        
+
         automata.setTransition(0, 40, "-");
         automata.setTransition(40, 41, "-");
         automata.setTransition(40, 39, Primitiva.OUTROS);
@@ -294,7 +339,7 @@ public class Compilador {
         automata.setTransition(40, 42, Primitiva.ESPACO, false);
         automata.setTransition(41, 0, Primitiva.LAMBIDA);
         automata.setTransition(42, 0, Primitiva.LAMBIDA);
-        
+
         automata.setTransition(0, 43, "*");
         automata.setTransition(43, 44, Primitiva.DIGITO, false);
         automata.setTransition(43, 44, Primitiva.LETRA, false);
@@ -302,37 +347,37 @@ public class Compilador {
         automata.setTransition(43, 44, Primitiva.SIMBOLO, false);
         automata.setTransition(43, 44, Primitiva.FIM_DE_LINHA, false);
         automata.setTransition(44, 0, Primitiva.LAMBIDA);
-        
+
         automata.setTransition(0, 45, "=");
         automata.setTransition(45, 46, Primitiva.DIGITO, false);
         automata.setTransition(45, 46, Primitiva.LETRA, false);
         automata.setTransition(45, 46, Primitiva.ESPACO, false);
         automata.setTransition(45, 46, Primitiva.SIMBOLO, false);
-        automata.setTransition(45, 46, Primitiva.FIM_DE_LINHA, false);              
+        automata.setTransition(45, 46, Primitiva.FIM_DE_LINHA, false);
         automata.setTransition(45, 47, "=");
-        automata.setTransition(46, 0, Primitiva.LAMBIDA);  
+        automata.setTransition(46, 0, Primitiva.LAMBIDA);
         automata.setTransition(47, 0, Primitiva.LAMBIDA);
-        
+
         automata.setTransition(0, 48, "<");
         automata.setTransition(48, 49, Primitiva.DIGITO, false);
         automata.setTransition(48, 49, Primitiva.LETRA, false);
         automata.setTransition(48, 49, Primitiva.ESPACO, false);
         automata.setTransition(48, 49, Primitiva.SIMBOLO, false);
-        automata.setTransition(48, 49, Primitiva.FIM_DE_LINHA, false);              
+        automata.setTransition(48, 49, Primitiva.FIM_DE_LINHA, false);
         automata.setTransition(48, 50, "=");
         automata.setTransition(49, 0, Primitiva.LAMBIDA);
         automata.setTransition(50, 0, Primitiva.LAMBIDA);
-        
+
         automata.setTransition(0, 48, ">");
         automata.setTransition(48, 49, Primitiva.DIGITO, false);
         automata.setTransition(48, 49, Primitiva.LETRA, false);
         automata.setTransition(48, 49, Primitiva.ESPACO, false);
         automata.setTransition(48, 49, Primitiva.SIMBOLO, false);
-        automata.setTransition(48, 49, Primitiva.FIM_DE_LINHA, false);              
+        automata.setTransition(48, 49, Primitiva.FIM_DE_LINHA, false);
         automata.setTransition(48, 50, "=");
-        automata.setTransition(49, 0, Primitiva.LAMBIDA);  
+        automata.setTransition(49, 0, Primitiva.LAMBIDA);
         automata.setTransition(50, 0, Primitiva.LAMBIDA);
-        
+
         automata.setTransition(0, 51, "|");
         automata.setTransition(51, 52, "|");
         automata.setTransition(51, 53, Primitiva.DIGITO, false);
@@ -343,7 +388,7 @@ public class Compilador {
         automata.setTransition(51, 53, Primitiva.OUTROS, false);
         automata.setTransition(52, 0, Primitiva.LAMBIDA);
         automata.setTransition(53, 0, Primitiva.LAMBIDA);
-        
+
         automata.setTransition(0, 54, "&");
         automata.setTransition(54, 55, "&");
         automata.setTransition(54, 53, Primitiva.DIGITO, false);
@@ -353,19 +398,20 @@ public class Compilador {
         automata.setTransition(54, 53, Primitiva.ESPACO, false);
         automata.setTransition(54, 53, Primitiva.OUTROS, false);
         automata.setTransition(55, 0, Primitiva.LAMBIDA);
-        
+
         automata.setTransition(0, 56, ".");
         automata.setTransition(56, 57, Primitiva.LETRA, false);
-        automata.setTransition(56, 58, Primitiva.DIGITO, false);
+        automata.setTransition(56, 57, Primitiva.DIGITO, false);
         automata.setTransition(56, 58, Primitiva.SIMBOLO, false);
         automata.setTransition(56, 58, Primitiva.ESPACO);
         automata.setTransition(56, 58, Primitiva.FIM_DE_LINHA);
         automata.setTransition(57, 0, Primitiva.LAMBIDA);
         automata.setTransition(58, 0, Primitiva.LAMBIDA);
-        
-        
+
         automata.setTransition(59, 0, Primitiva.LAMBIDA);
         
+        automata.setTransition(80, 47, "=");
+
     }
 
 }
