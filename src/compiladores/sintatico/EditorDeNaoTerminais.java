@@ -55,7 +55,7 @@ public class EditorDeNaoTerminais {
                 if (listaTokens.get(0).getLexema().equals("constantes")) {
                     analisadorSintatico.getNaoTerminal("bloco_constantes").executar(listaTokens);
                     analisadorSintatico.getNaoTerminal("bloco_variaveis").executar(listaTokens);
-                    analisadorSintatico.getNaoTerminal("lista_funções").executar(listaTokens);
+                    analisadorSintatico.getNaoTerminal("lista_funcoes").executar(listaTokens);
                 } else {
                     tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "constantes");
                 }
@@ -580,7 +580,7 @@ public class EditorDeNaoTerminais {
                 }
             }
         }));
-        
+
         analisadorSintatico.addNaoTerminal(new NaoTerminal("prox_parametro", new ExecutorNaoTerminal() {
             @Override
             public void executarLeitura(ArrayList<Token> listaTokens) {
@@ -590,15 +590,15 @@ public class EditorDeNaoTerminais {
                     analisadorSintatico.getNaoTerminal("parametro").executar(listaTokens);
                     analisadorSintatico.getNaoTerminal("prox_parametro").executar(listaTokens);
                 } else if (temp.equals(")")) {
-                    EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);                    
+                    EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                 } else {
                     tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             ", ou )");
                 }
             }
         }));
-        
-        analisadorSintatico.addNaoTerminal(new NaoTerminal("lista_parametros", new ExecutorNaoTerminal() {
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("parametro", new ExecutorNaoTerminal() {
             @Override
             public void executarLeitura(ArrayList<Token> listaTokens) {
                 //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
@@ -606,18 +606,864 @@ public class EditorDeNaoTerminais {
                 if (temp.equals("inteiro") || temp.equals("real") || temp.equals("booleano")
                         || temp.equals("char") || temp.equals("cadeia")
                         || (listaTokens.get(0).getTipoToken() == TipoToken.IDENTIFICADOR)) {
-                    analisadorSintatico.getNaoTerminal("parametro").executar(listaTokens);
-                    analisadorSintatico.getNaoTerminal("prox_parametro").executar(listaTokens);
-                } else if (temp.equals("vazio")) {
+                    analisadorSintatico.getNaoTerminal("tipo_parametro").executar(listaTokens);
+                    analisadorSintatico.getNaoTerminal("id").executar(listaTokens);
+                    analisadorSintatico.getNaoTerminal("colchete").executar(listaTokens);
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                            "inteiro ou real ou booleano ou char ou cadeia ou identificador");
+                }
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("tipo_parametro", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("inteiro") || temp.equals("real") || temp.equals("booleano")
+                        || temp.equals("char") || temp.equals("cadeia")) {
+                    analisadorSintatico.getNaoTerminal("tipo_primitivo").executar(listaTokens);
+                } else if (listaTokens.get(0).getTipoToken() == TipoToken.IDENTIFICADOR) {
+                    analisadorSintatico.getNaoTerminal("id").executar(listaTokens);
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                            "inteiro ou real ou booleano ou char ou cadeia ou identificador");
+                }
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("colchete", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("[")) {
                     EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
-                    if (listaTokens.get(0).getLexema().equals(")")) {
+                    analisadorSintatico.getNaoTerminal("inteiro").executar(listaTokens);
+                    if ((listaTokens.get(0).getTipoToken() == TipoToken.NUMERO_INTEIRO)) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "inteiro");
+                    }
+                    if (listaTokens.get(0).getLexema().equals("]")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "]");
+                    }
+                    analisadorSintatico.getNaoTerminal("colchete").executar(listaTokens);
+                }
+                //tem lambda
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("corpo", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("variaveis")) {
+                    analisadorSintatico.getNaoTerminal("bloco_variaveis").executar(listaTokens);
+                    analisadorSintatico.getNaoTerminal("lista_comandos").executar(listaTokens);
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "variaveis");
+                }
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("corpo", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("variaveis")) {
+                    analisadorSintatico.getNaoTerminal("bloco_variaveis").executar(listaTokens);
+                    analisadorSintatico.getNaoTerminal("lista_comandos").executar(listaTokens);
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "variaveis");
+                }
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("inst_retorno", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("retorno")) {
+                    analisadorSintatico.getNaoTerminal("argumento_retorno").executar(listaTokens);
+                    if (listaTokens.get(0).getLexema().equals(";")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
+                    }
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "retorno");
+                }
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("argumento_retorno", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("inteiro") || temp.equals("real") || temp.equals("booleano")
+                        || temp.equals("char") || temp.equals("cadeia")) {
+                    analisadorSintatico.getNaoTerminal("valor").executar(listaTokens);
+                } else if (listaTokens.get(0).getTipoToken() == TipoToken.IDENTIFICADOR) {
+                    analisadorSintatico.getNaoTerminal("argumento").executar(listaTokens);
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                            "inteiro ou real ou booleano ou char ou cadeia ou vazio ou identificador");
+                }
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("algoritmo", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("algoritimo")) {
+                    EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    if (listaTokens.get(0).getLexema().equals("{")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "{");
+                    }
+                    analisadorSintatico.getNaoTerminal("corpo").executar(listaTokens);
+                    if (listaTokens.get(0).getLexema().equals("}")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "}");
+                    }
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "algoritimo");
+                }
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("algoritmo", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("algoritimo")) {
+                    EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    if (listaTokens.get(0).getLexema().equals("{")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "{");
+                    }
+                    analisadorSintatico.getNaoTerminal("corpo").executar(listaTokens);
+                    if (listaTokens.get(0).getLexema().equals("}")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "}");
+                    }
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "algoritimo");
+                }
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("lista_comandos", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("escreva") || temp.equals("leia") || temp.equals("enquanto")
+                        || temp.equals("se") || temp.equals("para")
+                        || (listaTokens.get(0).getTipoToken() == TipoToken.IDENTIFICADOR)) {
+                    analisadorSintatico.getNaoTerminal("comando").executar(listaTokens);
+                    analisadorSintatico.getNaoTerminal("lista_comando").executar(listaTokens);
+                }
+                //Tem lambda
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("comando", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("escreva")) {
+                    analisadorSintatico.getNaoTerminal("escreva").executar(listaTokens);
+                } else if (temp.equals("leia")) {
+                    analisadorSintatico.getNaoTerminal("leia").executar(listaTokens);
+                } else if (temp.equals("enquanto")) {
+                    analisadorSintatico.getNaoTerminal("enquanto").executar(listaTokens);
+                } else if (temp.equals("se")) {
+                    analisadorSintatico.getNaoTerminal("se").executar(listaTokens);
+                } else if (temp.equals("para")) {
+                    analisadorSintatico.getNaoTerminal("para").executar(listaTokens);
+                } else if (listaTokens.get(0).getTipoToken() == TipoToken.IDENTIFICADOR) {
+                    analisadorSintatico.getNaoTerminal("id").executar(listaTokens);
+                    analisadorSintatico.getNaoTerminal("atrib_ou_chamaFuncao").executar(listaTokens);
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                            "escreva ou leia ou enquanto ou se ou para ou identificador");
+                }
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("atrib_ou_chamaFuncao", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("[") || temp.equals(".") || temp.equals("=")) {
+                    analisadorSintatico.getNaoTerminal("atribuicao").executar(listaTokens);
+                } else if (listaTokens.get(0).getTipoToken() == TipoToken.IDENTIFICADOR) {
+                    analisadorSintatico.getNaoTerminal("chamada_funcao").executar(listaTokens);
+                    if (listaTokens.get(0).getLexema().equals(";")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
+                    }
+
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                            "[ ou . ou =");
+                }
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("atribuicao", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("[") || temp.equals("=")) {
+                    if (temp.equals("[")) {
+                        analisadorSintatico.getNaoTerminal("acesso_matriz").executar(listaTokens);
+                    }
+                    if (temp.equals("=")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "=");
+                    }
+                    analisadorSintatico.getNaoTerminal("exp_aritmetica").executar(listaTokens);
+                    if (temp.equals(";")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "=");
+                    }
+
+                } else if (temp.equals(".")) {
+                    analisadorSintatico.getNaoTerminal("id").executar(listaTokens);
+                    if (listaTokens.get(0).getLexema().equals("=")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "=");
+                    }
+                    analisadorSintatico.getNaoTerminal("exp_aritmetica").executar(listaTokens);
+                    if (listaTokens.get(0).getLexema().equals(";")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
+                    }
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                            "[ ou . ou =");
+                }
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("escreva", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("escreva")) {
+                    EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    if (temp.equals("(")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    }
+                    analisadorSintatico.getNaoTerminal("lista_arg_escrita").executar(listaTokens);
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                            "escreva");
+                }
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("lista_arg_escrita", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if ((listaTokens.get(0).getTipoToken() == TipoToken.CARACTERE_CONSTANTE)
+                        || (listaTokens.get(0).getTipoToken() == TipoToken.CADEIA_CONSTANTE)
+                        || (listaTokens.get(0).getTipoToken() == TipoToken.IDENTIFICADOR)) {
+                    analisadorSintatico.getNaoTerminal("arg_escrita").executar(listaTokens);
+                    analisadorSintatico.getNaoTerminal("prox_arg_escrita").executar(listaTokens);
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                            "caractere ou cadeia ou identificador");
+                }
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("prox_arg_escrita", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals(",")) {
+                    EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    analisadorSintatico.getNaoTerminal("arg_escrita").executar(listaTokens);
+                    analisadorSintatico.getNaoTerminal("prox_arg_escrita").executar(listaTokens);
+                } else if (temp.equals(")")) {
+                    EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    if (temp.equals(";")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
+                    }
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                            ", ou )");
+                }
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("arg_escrita", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if ((listaTokens.get(0).getTipoToken() == TipoToken.CARACTERE_CONSTANTE)
+                        || (listaTokens.get(0).getTipoToken() == TipoToken.CADEIA_CONSTANTE)) {
+                    EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    analisadorSintatico.getNaoTerminal("arg_escrita").executar(listaTokens);
+                    analisadorSintatico.getNaoTerminal("prox_arg_escrita").executar(listaTokens);
+                } else if (listaTokens.get(0).getTipoToken() == TipoToken.IDENTIFICADOR) {
+                    analisadorSintatico.getNaoTerminal("argumento").executar(listaTokens);
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                            "caractere ou cadeia ou identificador");
+                }
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("leia", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("leia")) {
+                    EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    if (temp.equals("(")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "(");
+                    }
+                    analisadorSintatico.getNaoTerminal("argumento").executar(listaTokens);
+                    analisadorSintatico.getNaoTerminal("prox_argumento").executar(listaTokens);
+                    if (temp.equals(")")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
                         tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ")");
                     }
+                    if (temp.equals(";")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
+                    }
                 } else {
                     tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
-                            "inteiro ou real ou booleano ou char ou cadeia ou identificador ou vazio");
+                            "leia");
+                }
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("enquanto", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("enquanto")) {
+                    EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    if (temp.equals("(")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "(");
+                    }
+                    analisadorSintatico.getNaoTerminal("exp_logica").executar(listaTokens);
+                    if (temp.equals(")")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ")");
+                    }
+                    if (temp.equals("{")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "}");
+                    }
+                    analisadorSintatico.getNaoTerminal("lista_comandos").executar(listaTokens);
+                    if (temp.equals("}")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "}");
+                    }
+                    if (temp.equals(";")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
+                    }
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                            "enquanto");
+                }
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("se", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("se")) {
+                    EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    if (temp.equals("(")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "(");
+                    }
+                    analisadorSintatico.getNaoTerminal("exp_logica").executar(listaTokens);
+                    if (temp.equals(")")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ")");
+                    }
+                    if (temp.equals("{")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "}");
+                    }
+                    analisadorSintatico.getNaoTerminal("lista_comandos").executar(listaTokens);
+                    if (temp.equals("}")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "}");
+                    }
+                    analisadorSintatico.getNaoTerminal("lista_comandos").executar(listaTokens);
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                            "se");
+                }
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("compl_se", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("senao")) {
+                    analisadorSintatico.getNaoTerminal("else").executar(listaTokens);
+                } else if (temp.equals(";")) {
+                    EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                            "senao ou ;");
+                }
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("senao", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("senao")) {
+                    EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    if (temp.equals("{")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "{");
+                    }
+                    analisadorSintatico.getNaoTerminal("lista_comandos").executar(listaTokens);
+                    if (temp.equals("}")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "}");
+                    }
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                            "senao");
+                }
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("para", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("para")) {
+                    EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    if (temp.equals("(")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "(");
+                    }
+                    analisadorSintatico.getNaoTerminal("exp_atribuicao").executar(listaTokens);
+                    if (temp.equals(";")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
+                    }
+                    analisadorSintatico.getNaoTerminal("exp_logica").executar(listaTokens);
+                    if (temp.equals(";")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
+                    }
+                    analisadorSintatico.getNaoTerminal("exp_atribuicao").executar(listaTokens);
+                    if (temp.equals(")")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ")");
+                    }
+                    if (temp.equals("{")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "{");
+                    }
+                    analisadorSintatico.getNaoTerminal("lista_comandos").executar(listaTokens);
+                    if (temp.equals("}")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "}");
+                    }
+                    if (temp.equals(";")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
+                    }
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                            "para");
+                }
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("exp_logica", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals(")")
+                        || (listaTokens.get(0).getTipoToken() == TipoToken.NUMERO_INTEIRO)
+                        || (listaTokens.get(0).getTipoToken() == TipoToken.NUMERO_REAL)
+                        || (listaTokens.get(0).getTipoToken() == TipoToken.IDENTIFICADOR)) {
+                    analisadorSintatico.getNaoTerminal("termo_logico").executar(listaTokens);
+                    analisadorSintatico.getNaoTerminal("exp_logica_ou").executar(listaTokens);
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                            "inteiro ou real ou identificador");
+                }
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("termo_logico", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("(")
+                        || (listaTokens.get(0).getTipoToken() == TipoToken.NUMERO_INTEIRO)
+                        || (listaTokens.get(0).getTipoToken() == TipoToken.NUMERO_REAL)
+                        || (listaTokens.get(0).getTipoToken() == TipoToken.IDENTIFICADOR)) {
+                    analisadorSintatico.getNaoTerminal("exp_relacional").executar(listaTokens);
+                    analisadorSintatico.getNaoTerminal("exp_logica_e").executar(listaTokens);
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                            "inteiro ou real ou identificador ou (");
+                }
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("exp_logica_ou", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("||")) {
+                    EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    analisadorSintatico.getNaoTerminal("termo_logico").executar(listaTokens);
+                    analisadorSintatico.getNaoTerminal("exp_logica_ou").executar(listaTokens);
+                }
+                //tem lambda
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("exp_logica_e", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("&&")) {
+                    EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    analisadorSintatico.getNaoTerminal("exp_relacional").executar(listaTokens);
+                    analisadorSintatico.getNaoTerminal("exp_logica_e").executar(listaTokens);
+                }
+                //tem lambda
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("exp_relacional", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("(")
+                        || (listaTokens.get(0).getTipoToken() == TipoToken.NUMERO_INTEIRO)
+                        || (listaTokens.get(0).getTipoToken() == TipoToken.NUMERO_REAL)
+                        || (listaTokens.get(0).getTipoToken() == TipoToken.IDENTIFICADOR)) {
+                    EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    analisadorSintatico.getNaoTerminal("exp_aritmetica").executar(listaTokens);
+                    analisadorSintatico.getNaoTerminal("compl_exp_rel").executar(listaTokens);
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                            "inteiro ou real ou identificador ou (");
+                }
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("compl_exp_rel", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("==")) {
+                    EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    analisadorSintatico.getNaoTerminal("termo_igualdade").executar(listaTokens);
+                } else if (listaTokens.get(0).getTipoToken() == TipoToken.OPERADOR_RELACIONAL) {
+                    analisadorSintatico.getNaoTerminal("exp_aritmetica").executar(listaTokens);
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                            "operador relcional ou =");
+                }
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("compl_exp_rel", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("==")) {
+                    EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    analisadorSintatico.getNaoTerminal("termo_igualdade").executar(listaTokens);
+                } else if (listaTokens.get(0).getTipoToken() == TipoToken.OPERADOR_RELACIONAL) {
+                    analisadorSintatico.getNaoTerminal("exp_aritmetica").executar(listaTokens);
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                            "operador relcional");
+                }
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("termo_igualdade", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("(")
+                        || (listaTokens.get(0).getTipoToken() == TipoToken.NUMERO_INTEIRO)
+                        || (listaTokens.get(0).getTipoToken() == TipoToken.NUMERO_REAL)
+                        || (listaTokens.get(0).getTipoToken() == TipoToken.IDENTIFICADOR)) {
+                    analisadorSintatico.getNaoTerminal("exp_aritmetica").executar(listaTokens);
+                } else if (temp.equals("verdadeiro") || temp.equals("falso")) {
+                    EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                            "inteiro ou real ou identificador ou verdadeiro ou falso ou (");
+                }
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("exp_aritmetica", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("(")
+                        || (listaTokens.get(0).getTipoToken() == TipoToken.NUMERO_INTEIRO)
+                        || (listaTokens.get(0).getTipoToken() == TipoToken.NUMERO_REAL)
+                        || (listaTokens.get(0).getTipoToken() == TipoToken.IDENTIFICADOR)) {
+                    analisadorSintatico.getNaoTerminal("termo_aritmetico").executar(listaTokens);
+                    analisadorSintatico.getNaoTerminal("compl_exp_arit").executar(listaTokens);
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                            "inteiro ou real ou identificador ou (");
+                }
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("termo_aritmetico", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("(")
+                        || (listaTokens.get(0).getTipoToken() == TipoToken.NUMERO_INTEIRO)
+                        || (listaTokens.get(0).getTipoToken() == TipoToken.NUMERO_REAL)
+                        || (listaTokens.get(0).getTipoToken() == TipoToken.IDENTIFICADOR)) {
+                    analisadorSintatico.getNaoTerminal("operando").executar(listaTokens);
+                    analisadorSintatico.getNaoTerminal("compl_termo_aritmetico").executar(listaTokens);
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                            "inteiro ou real ou identificador ou (");
+                }
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("compl_termo_aritmetico", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("*") || temp.equals("/")) {
+                    analisadorSintatico.getNaoTerminal("op_arit_primario").executar(listaTokens);
+                    analisadorSintatico.getNaoTerminal("termo_aritmetico").executar(listaTokens);
+                }
+                //Tem lambda
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("compl_exp_arit", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("*") || temp.equals("/")) {
+                    analisadorSintatico.getNaoTerminal("op_arit_secundario").executar(listaTokens);
+                    analisadorSintatico.getNaoTerminal("termo_aritmetico").executar(listaTokens);
+                    analisadorSintatico.getNaoTerminal("compl_exp_arit").executar(listaTokens);
+                }
+                //Tem lambda
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("op_arit_primario", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("*") || temp.equals("/")) {
+                    EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                            "* ou /");
+                }
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("op_arit_secundario", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("+") || temp.equals("-")) {
+                    EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                            "+ ou -");
+                }
+            }
+        }));
+
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("operando", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if ((listaTokens.get(0).getTipoToken() == TipoToken.NUMERO_INTEIRO)
+                        || (listaTokens.get(0).getTipoToken() == TipoToken.NUMERO_REAL)
+                        || (listaTokens.get(0).getTipoToken() == TipoToken.IDENTIFICADOR)) {
+                    analisadorSintatico.getNaoTerminal("tipos_operando").executar(listaTokens);
+                } else if (temp.equals("(")) {
+                    EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    analisadorSintatico.getNaoTerminal("exp_logica").executar(listaTokens);
+                    if (temp.equals(")")) {
+                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                        analisadorSintatico.getNaoTerminal("exp_logica").executar(listaTokens);
+                    } else {
+                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                                ")");
+                    }
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                            "inteiro ou real ou identificador ou (");
+                }
+            }
+        }));
+        
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("tipos_operando", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (listaTokens.get(0).getTipoToken() == TipoToken.IDENTIFICADOR) {
+                    analisadorSintatico.getNaoTerminal("acesso_var").executar(listaTokens);
+                } else if ((listaTokens.get(0).getTipoToken() == TipoToken.NUMERO_INTEIRO)
+                        || (listaTokens.get(0).getTipoToken() == TipoToken.NUMERO_REAL)) {
+                    EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                            "inteiro ou real ou identificador");
+                }
+            }
+        }));
+        
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("acesso_var", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (listaTokens.get(0).getTipoToken() == TipoToken.IDENTIFICADOR) {
+                    analisadorSintatico.getNaoTerminal("id").executar(listaTokens);
+                    analisadorSintatico.getNaoTerminal("compl_tipo_parametro").executar(listaTokens);
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                            "identificador");
+                }
+            }
+        }));
+        
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("exp_atribuicao", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (listaTokens.get(0).getTipoToken() == TipoToken.IDENTIFICADOR) {
+                    analisadorSintatico.getNaoTerminal("acesso_var").executar(listaTokens);
+                    analisadorSintatico.getNaoTerminal("compl_atribuicao").executar(listaTokens);
+                } else {
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                            "identificador");
+                }
+            }
+        }));
+        
+        analisadorSintatico.addNaoTerminal(new NaoTerminal("compl_atribuicao", new ExecutorNaoTerminal() {
+            @Override
+            public void executarLeitura(ArrayList<Token> listaTokens) {
+                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                String temp = listaTokens.get(0).getLexema();
+                if (temp.equals("=")) {
+                    EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                    analisadorSintatico.getNaoTerminal("exp_aritmetica").executar(listaTokens);
+                } else if(listaTokens.get(0).getTipoToken() == TipoToken.OPERADOR_ARITMETICO_UNARIO){
+                    EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                }else{
+                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                            "= ou operador unário");
                 }
             }
         }));
