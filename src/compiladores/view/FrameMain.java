@@ -230,11 +230,13 @@ public class FrameMain extends javax.swing.JFrame {
         tableErrosLexicos.setModel(new ErroTableModel(listaErros));
         tableErrosSintaticos.setModel(new ErroSintaticoTableModel(listaErrosSintaticos));
 
-        if (listaErros.size() <= 0) {
+        if (listaErros.size() <= 0 && listaErrosSintaticos.size() <=0) {
             JOptionPane.showMessageDialog(this, "Análise léxica feita com sucesso!", "Sucesso", 
                     JOptionPane.INFORMATION_MESSAGE);
         } else {
-            JOptionPane.showMessageDialog(this, "Análise léxica possui erros!", "Erro", 
+            JOptionPane.showMessageDialog(this, "Análise léxica possui "+listaErros.size()+" erros!\n"
+                    + "Análise sintática possui "+listaErrosSintaticos.size()+" erros!\n",
+                    "Erro", 
                     JOptionPane.ERROR_MESSAGE);
         }
 

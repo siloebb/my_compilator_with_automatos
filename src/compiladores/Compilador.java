@@ -7,8 +7,6 @@ import compiladores.enums.TipoToken;
 import compiladores.sintatico.AnalisadorSintatico;
 import compiladores.sintatico.EditorDeNaoTerminais;
 import compiladores.sintatico.ErroSintatico;
-import compiladores.sintatico.ExecutorNaoTerminal;
-import compiladores.sintatico.NaoTerminal;
 import compiladores.utils.Identificador;
 import java.util.ArrayList;
 
