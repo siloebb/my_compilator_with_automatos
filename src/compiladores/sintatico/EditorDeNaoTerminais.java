@@ -12,9 +12,25 @@ public class EditorDeNaoTerminais {
 
     private static ArrayList<ErroSintatico> listaErros;
 
-    public static void tratarErros(int linha, String encontrado, String esperado) {
+    public static void tratarErros(ArrayList<Token> listaTokens, int linha, String encontrado, String esperado) {
         ErroSintatico erro = new ErroSintatico(linha, encontrado, esperado);
         listaErros.add(erro);
+
+        if (esperado.equals(";")) {
+            int i = 0;
+            while (i < listaTokens.size()) {
+                String lexema = listaTokens.get(0 + i).getLexema();
+                if (lexema.equals(";")) {
+                    removePrimeiroItemDaLista(listaTokens);
+                    break;
+                } else if(listaTokens.get(0+i).getTipoToken()==TipoToken.PALAVRA_RESERVADA){
+                    break;
+                }else{
+                    removePrimeiroItemDaLista(listaTokens);
+                }
+            }
+        }
+
     }
 
     public static ArrayList<ErroSintatico> setNaoTerminais(final AnalisadorSintatico analisadorSintatico) {
@@ -27,7 +43,7 @@ public class EditorDeNaoTerminais {
                 if (listaTokens.get(0).getTipoToken() == TipoToken.IDENTIFICADOR) {
                     EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "identificador");
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "identificador");
                 }
             }
         }));
@@ -42,7 +58,7 @@ public class EditorDeNaoTerminais {
                 } else if (listaTokens.get(0).getLexema().equals("constantes")) {
                     analisadorSintatico.getNaoTerminal("const_vars_proc").executar(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "registrou ou constantes");
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "registrou ou constantes");
                 }
 
             }
@@ -57,7 +73,7 @@ public class EditorDeNaoTerminais {
                     analisadorSintatico.getNaoTerminal("bloco_variaveis").executar(listaTokens);
                     analisadorSintatico.getNaoTerminal("lista_funcoes").executar(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "constantes");
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "constantes");
                 }
             }
         }));
@@ -73,10 +89,10 @@ public class EditorDeNaoTerminais {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                         analisadorSintatico.getNaoTerminal("lista_campos").executar(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "}");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "}");
                     }
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "registrou");
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "registrou");
                 }
             }
         }));
@@ -93,7 +109,7 @@ public class EditorDeNaoTerminais {
                 } else if (listaTokens.get(0).getLexema().equals("}")) {
                     EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "inteiro ou real ou booleano ou char ou cadeia ou }");
                 }
             }
@@ -113,10 +129,10 @@ public class EditorDeNaoTerminais {
                     if (listaTokens.get(0).getLexema().equals(";")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
                     }
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "inteiro ou real ou booleano ou char ou cadeia");
                 }
             }
@@ -132,10 +148,10 @@ public class EditorDeNaoTerminais {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                         analisadorSintatico.getNaoTerminal("lista_constantes").executar(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "{");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "{");
                     }
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "constantes");
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "constantes");
                 }
             }
         }));
@@ -152,7 +168,7 @@ public class EditorDeNaoTerminais {
                 } else if (listaTokens.get(0).getLexema().equals("}")) {
                     EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "inteiro ou real ou booleano ou char ou cadeia ou }");
                 }
             }
@@ -170,16 +186,16 @@ public class EditorDeNaoTerminais {
                     if (listaTokens.get(0).getLexema().equals("=")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "=");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "=");
                     }
                     analisadorSintatico.getNaoTerminal("valor").executar(listaTokens);
                     if (listaTokens.get(0).getLexema().equals(";")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
                     }
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "inteiro ou real ou booleano ou char ou cadeia");
                 }
             }
@@ -194,7 +210,7 @@ public class EditorDeNaoTerminais {
                         || temp.equals("char") || temp.equals("cadeia")) {
                     EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "inteiro ou real ou booleano ou char ou cadeia");
                 }
             }
@@ -212,7 +228,7 @@ public class EditorDeNaoTerminais {
                         || (tipoToken == TipoToken.CARACTERE_CONSTANTE) || (tipoToken == TipoToken.CADEIA_CONSTANTE)) {
                     EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "valor inteiro ou real ou booleano ou char ou cadeia");
                 }
             }
@@ -226,7 +242,7 @@ public class EditorDeNaoTerminais {
                 if ((tipoToken == TipoToken.NUMERO_INTEIRO) || (tipoToken == TipoToken.NUMERO_REAL)) {
                     EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "inteiro ou real");
                 }
             }
@@ -242,10 +258,10 @@ public class EditorDeNaoTerminais {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                         analisadorSintatico.getNaoTerminal("lista_variaveis").executar(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "{");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "{");
                     }
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "variaveis");
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "variaveis");
                 }
             }
         }));
@@ -263,7 +279,7 @@ public class EditorDeNaoTerminais {
                 } else if (listaTokens.get(0).getLexema().equals("}")) {
                     EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "identificador ou inteiro ou real ou booleano ou char ou cadeia ou }");
                 }
             }
@@ -286,10 +302,10 @@ public class EditorDeNaoTerminais {
                     if (listaTokens.get(0).getLexema().equals(";")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
                     }
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "identificador ou inteiro ou real ou booleano ou char ou cadeia");
                 }
             }
@@ -306,12 +322,12 @@ public class EditorDeNaoTerminais {
                     if (listaTokens.get(0).getLexema().equals(";")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
                     }
                 } else if (listaTokens.get(0).getLexema().equals("[") || listaTokens.get(0).getLexema().equals(";")) {
                     analisadorSintatico.getNaoTerminal("definicao_matriz").executar(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "= ou [ ou ;");
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "= ou [ ou ;");
                 }
             }
         }));
@@ -326,17 +342,17 @@ public class EditorDeNaoTerminais {
                     if (listaTokens.get(0).getTipoToken() == TipoToken.NUMERO_INTEIRO) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "inteiro");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "inteiro");
                     }
                     if (listaTokens.get(0).getLexema().equals("]")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "]");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "]");
                     }
                 } else if (listaTokens.get(0).getLexema().equals(";")) {
                     EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "[ ou ;");
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "[ ou ;");
                 }
             }
         }));
@@ -350,7 +366,7 @@ public class EditorDeNaoTerminais {
                     EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     analisadorSintatico.getNaoTerminal("lista_argumentos").executar(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "(");
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "(");
                 }
             }
         }));
@@ -364,7 +380,7 @@ public class EditorDeNaoTerminais {
                     EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     analisadorSintatico.getNaoTerminal("lista_argumentos").executar(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "(");
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "(");
                 }
             }
         }));
@@ -382,11 +398,11 @@ public class EditorDeNaoTerminais {
                     if (listaTokens.get(0).getLexema().equals(")")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ")");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ")");
                     }
 
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "identificador ou vazio");
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "identificador ou vazio");
                 }
             }
         }));
@@ -403,7 +419,7 @@ public class EditorDeNaoTerminais {
                 } else if (listaTokens.get(0).getLexema().equals(")")) {
                     EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ", ou )");
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ", ou )");
                 }
             }
         }));
@@ -417,7 +433,7 @@ public class EditorDeNaoTerminais {
                     analisadorSintatico.getNaoTerminal("id").executar(listaTokens);
                     analisadorSintatico.getNaoTerminal("compl_tipo_parametro").executar(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "identificador");
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "identificador");
                 }
             }
         }));
@@ -447,7 +463,7 @@ public class EditorDeNaoTerminais {
                     EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     analisadorSintatico.getNaoTerminal("id").executar(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ".");
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ".");
                 }
             }
         }));
@@ -463,7 +479,7 @@ public class EditorDeNaoTerminais {
                     if (listaTokens.get(0).getLexema().equals("]")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "]");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "]");
                     }
                     analisadorSintatico.getNaoTerminal("acesso_matriz").executar(listaTokens);
                 }
@@ -477,9 +493,9 @@ public class EditorDeNaoTerminais {
                 String temp = listaTokens.get(0).getLexema();
                 if ((listaTokens.get(0).getTipoToken() == TipoToken.NUMERO_INTEIRO)
                         || (listaTokens.get(0).getTipoToken() == TipoToken.IDENTIFICADOR)) {
-                    EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);                    
-                }else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "inteiro ou identificador");
+                    EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+                } else {
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "inteiro ou identificador");
                 }
             }
         }));
@@ -495,7 +511,7 @@ public class EditorDeNaoTerminais {
                 } else if (temp.equals("algoritimo")) {
                     analisadorSintatico.getNaoTerminal("algoritimo").executar(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "funcao ou algoritimo");
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "funcao ou algoritimo");
                 }
             }
         }));
@@ -512,23 +528,23 @@ public class EditorDeNaoTerminais {
                     if (temp.equals("(")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "(");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "(");
                     }
                     analisadorSintatico.getNaoTerminal("lista_parametros").executar(listaTokens);
                     if (temp.equals("{")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "{");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "{");
                     }
                     analisadorSintatico.getNaoTerminal("corpo").executar(listaTokens);
                     analisadorSintatico.getNaoTerminal("inst_retorno").executar(listaTokens);
                     if (temp.equals("}")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "}");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "}");
                     }
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "funcao");
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "funcao");
                 }
             }
         }));
@@ -546,7 +562,7 @@ public class EditorDeNaoTerminais {
                 } else if (temp.equals("vazio")) {
                     EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "inteiro ou real ou booleano ou char ou cadeia ou identificador ou vazio");
                 }
             }
@@ -567,10 +583,10 @@ public class EditorDeNaoTerminais {
                     if (listaTokens.get(0).getLexema().equals(")")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ")");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ")");
                     }
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "inteiro ou real ou booleano ou char ou cadeia ou identificador ou vazio");
                 }
             }
@@ -587,7 +603,7 @@ public class EditorDeNaoTerminais {
                 } else if (temp.equals(")")) {
                     EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             ", ou )");
                 }
             }
@@ -605,7 +621,7 @@ public class EditorDeNaoTerminais {
                     analisadorSintatico.getNaoTerminal("id").executar(listaTokens);
                     analisadorSintatico.getNaoTerminal("colchete").executar(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "inteiro ou real ou booleano ou char ou cadeia ou identificador");
                 }
             }
@@ -622,7 +638,7 @@ public class EditorDeNaoTerminais {
                 } else if (listaTokens.get(0).getTipoToken() == TipoToken.IDENTIFICADOR) {
                     analisadorSintatico.getNaoTerminal("id").executar(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "inteiro ou real ou booleano ou char ou cadeia ou identificador");
                 }
             }
@@ -639,12 +655,12 @@ public class EditorDeNaoTerminais {
                     if ((listaTokens.get(0).getTipoToken() == TipoToken.NUMERO_INTEIRO)) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "inteiro");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "inteiro");
                     }
                     if (listaTokens.get(0).getLexema().equals("]")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "]");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "]");
                     }
                     analisadorSintatico.getNaoTerminal("colchete").executar(listaTokens);
                 }
@@ -661,7 +677,7 @@ public class EditorDeNaoTerminais {
                     analisadorSintatico.getNaoTerminal("bloco_variaveis").executar(listaTokens);
                     analisadorSintatico.getNaoTerminal("lista_comandos").executar(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "variaveis");
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "variaveis");
                 }
             }
         }));
@@ -675,7 +691,7 @@ public class EditorDeNaoTerminais {
                     analisadorSintatico.getNaoTerminal("bloco_variaveis").executar(listaTokens);
                     analisadorSintatico.getNaoTerminal("lista_comandos").executar(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "variaveis");
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "variaveis");
                 }
             }
         }));
@@ -690,10 +706,10 @@ public class EditorDeNaoTerminais {
                     if (listaTokens.get(0).getLexema().equals(";")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
                     }
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "retorno");
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "retorno");
                 }
             }
         }));
@@ -709,7 +725,7 @@ public class EditorDeNaoTerminais {
                 } else if (listaTokens.get(0).getTipoToken() == TipoToken.IDENTIFICADOR) {
                     analisadorSintatico.getNaoTerminal("argumento").executar(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "inteiro ou real ou booleano ou char ou cadeia ou vazio ou identificador");
                 }
             }
@@ -725,16 +741,16 @@ public class EditorDeNaoTerminais {
                     if (listaTokens.get(0).getLexema().equals("{")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "{");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "{");
                     }
                     analisadorSintatico.getNaoTerminal("corpo").executar(listaTokens);
                     if (listaTokens.get(0).getLexema().equals("}")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "}");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "}");
                     }
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "algoritimo");
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "algoritimo");
                 }
             }
         }));
@@ -749,16 +765,16 @@ public class EditorDeNaoTerminais {
                     if (listaTokens.get(0).getLexema().equals("{")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "{");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "{");
                     }
                     analisadorSintatico.getNaoTerminal("corpo").executar(listaTokens);
                     if (listaTokens.get(0).getLexema().equals("}")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "}");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "}");
                     }
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "algoritimo");
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "algoritimo");
                 }
             }
         }));
@@ -797,7 +813,7 @@ public class EditorDeNaoTerminais {
                     analisadorSintatico.getNaoTerminal("id").executar(listaTokens);
                     analisadorSintatico.getNaoTerminal("atrib_ou_chamaFuncao").executar(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "escreva ou leia ou enquanto ou se ou para ou identificador");
                 }
             }
@@ -815,17 +831,17 @@ public class EditorDeNaoTerminais {
                     if (listaTokens.get(0).getLexema().equals(";")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
                     }
-                } else if(temp.equals("++") || temp.equals("--")){
+                } else if (temp.equals("++") || temp.equals("--")) {
                     EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     if (listaTokens.get(0).getLexema().equals(";")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
                     }
-                }else{
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                } else {
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "[ ou . ou = ou operador unario");
                 }
             }
@@ -843,7 +859,7 @@ public class EditorDeNaoTerminais {
                     if (listaTokens.get(0).getLexema().equals("=")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "=");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "=");
                     }
                     //Mudado
                     if (listaTokens.get(0).getTipoToken() == TipoToken.CADEIA_CONSTANTE
@@ -857,7 +873,7 @@ public class EditorDeNaoTerminais {
                     if (listaTokens.get(0).getLexema().equals(";")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
                     }
 
                 } else if (temp.equals(".")) {
@@ -865,16 +881,16 @@ public class EditorDeNaoTerminais {
                     if (listaTokens.get(0).getLexema().equals("=")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "=");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "=");
                     }
                     analisadorSintatico.getNaoTerminal("exp_aritmetica").executar(listaTokens);
                     if (listaTokens.get(0).getLexema().equals(";")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
                     }
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "[ ou . ou =");
                 }
             }
@@ -892,7 +908,7 @@ public class EditorDeNaoTerminais {
                     }
                     analisadorSintatico.getNaoTerminal("lista_arg_escrita").executar(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "escreva");
                 }
             }
@@ -909,7 +925,7 @@ public class EditorDeNaoTerminais {
                     analisadorSintatico.getNaoTerminal("arg_escrita").executar(listaTokens);
                     analisadorSintatico.getNaoTerminal("prox_arg_escrita").executar(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "caractere ou cadeia ou identificador");
                 }
             }
@@ -929,10 +945,10 @@ public class EditorDeNaoTerminais {
                     if (listaTokens.get(0).getLexema().equals(";")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
                     }
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             ", ou )");
                 }
             }
@@ -951,7 +967,7 @@ public class EditorDeNaoTerminais {
                 } else if (listaTokens.get(0).getTipoToken() == TipoToken.IDENTIFICADOR) {
                     analisadorSintatico.getNaoTerminal("argumento").executar(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "caractere ou cadeia ou identificador");
                 }
             }
@@ -967,23 +983,23 @@ public class EditorDeNaoTerminais {
                     if (listaTokens.get(0).getLexema().equals("(")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "(");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "(");
                     }
                     analisadorSintatico.getNaoTerminal("argumento").executar(listaTokens);
                     analisadorSintatico.getNaoTerminal("prox_argumento").executar(listaTokens);
-                    
+
 //                    if (listaTokens.get(0).getLexema().equals(")")) {
 //                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
 //                    } else {
-//                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ")");
+//                        tratarErros(listaTokens,listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ")");
 //                    }
                     if (listaTokens.get(0).getLexema().equals(";")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
                     }
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "leia");
                 }
             }
@@ -999,32 +1015,32 @@ public class EditorDeNaoTerminais {
                     if (listaTokens.get(0).getLexema().equals("(")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "(");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "(");
                     }
                     analisadorSintatico.getNaoTerminal("exp_logica").executar(listaTokens);
                     if (listaTokens.get(0).getLexema().equals(")")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ")");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ")");
                     }
                     if (listaTokens.get(0).getLexema().equals("{")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "{");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "{");
                     }
                     analisadorSintatico.getNaoTerminal("lista_comandos").executar(listaTokens);
                     if (listaTokens.get(0).getLexema().equals("}")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "}");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "}");
                     }
                     if (listaTokens.get(0).getLexema().equals(";")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
                     }
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "enquanto");
                 }
             }
@@ -1040,28 +1056,28 @@ public class EditorDeNaoTerminais {
                     if (listaTokens.get(0).getLexema().equals("(")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "(");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "(");
                     }
                     analisadorSintatico.getNaoTerminal("exp_logica").executar(listaTokens);
                     if (listaTokens.get(0).getLexema().equals(")")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ")");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ")");
                     }
                     if (listaTokens.get(0).getLexema().equals("{")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "}");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "}");
                     }
                     analisadorSintatico.getNaoTerminal("lista_comandos").executar(listaTokens);
                     if (listaTokens.get(0).getLexema().equals("}")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "}");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "}");
                     }
                     analisadorSintatico.getNaoTerminal("compl_se").executar(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "se");
                 }
             }
@@ -1077,7 +1093,7 @@ public class EditorDeNaoTerminais {
                 } else if (temp.equals(";")) {
                     EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "senao ou ;");
                 }
             }
@@ -1093,21 +1109,21 @@ public class EditorDeNaoTerminais {
                     if (listaTokens.get(0).getLexema().equals("{")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "{");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "{");
                     }
                     analisadorSintatico.getNaoTerminal("lista_comandos").executar(listaTokens);
                     if (listaTokens.get(0).getLexema().equals("}")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "}");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "}");
                     }
                     if (listaTokens.get(0).getLexema().equals(";")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
                     }
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "senao");
                 }
             }
@@ -1123,44 +1139,44 @@ public class EditorDeNaoTerminais {
                     if (listaTokens.get(0).getLexema().equals("(")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "(");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "(");
                     }
                     analisadorSintatico.getNaoTerminal("exp_atribuicao").executar(listaTokens);
                     if (listaTokens.get(0).getLexema().equals(";")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
                     }
                     analisadorSintatico.getNaoTerminal("exp_logica").executar(listaTokens);
                     if (listaTokens.get(0).getLexema().equals(";")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
                     }
                     analisadorSintatico.getNaoTerminal("exp_atribuicao").executar(listaTokens);
                     if (listaTokens.get(0).getLexema().equals(")")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ")");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ")");
                     }
                     if (listaTokens.get(0).getLexema().equals("{")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "{");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "{");
                     }
                     analisadorSintatico.getNaoTerminal("lista_comandos").executar(listaTokens);
                     if (listaTokens.get(0).getLexema().equals("}")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "}");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "}");
                     }
                     if (listaTokens.get(0).getLexema().equals(";")) {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), ";");
                     }
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "para");
                 }
             }
@@ -1179,7 +1195,7 @@ public class EditorDeNaoTerminais {
                     analisadorSintatico.getNaoTerminal("exp_logica_ou").executar(listaTokens);
                 }
 //                else {
-//                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+//                    tratarErros(listaTokens,listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
 //                            "inteiro ou real ou identificador ou (");
 //                }
             }
@@ -1197,7 +1213,7 @@ public class EditorDeNaoTerminais {
                     analisadorSintatico.getNaoTerminal("exp_relacional").executar(listaTokens);
                     analisadorSintatico.getNaoTerminal("exp_logica_e").executar(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "inteiro ou real ou identificador ou (");
                 }
             }
@@ -1243,7 +1259,7 @@ public class EditorDeNaoTerminais {
                     analisadorSintatico.getNaoTerminal("exp_aritmetica").executar(listaTokens);
                     analisadorSintatico.getNaoTerminal("compl_exp_rel").executar(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "inteiro ou real ou identificador ou (");
                 }
             }
@@ -1261,7 +1277,7 @@ public class EditorDeNaoTerminais {
                     EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                     analisadorSintatico.getNaoTerminal("exp_aritmetica").executar(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "operador relacional ou ==");
                 }
             }
@@ -1280,7 +1296,7 @@ public class EditorDeNaoTerminais {
                 } else if (temp.equals("verdadeiro") || temp.equals("falso")) {
                     EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "inteiro ou real ou identificador ou verdadeiro ou falso ou (");
                 }
             }
@@ -1298,7 +1314,7 @@ public class EditorDeNaoTerminais {
                     analisadorSintatico.getNaoTerminal("termo_aritmetico").executar(listaTokens);
                     analisadorSintatico.getNaoTerminal("compl_exp_arit").executar(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "inteiro ou real ou identificador ou (");
                 }
             }
@@ -1315,9 +1331,8 @@ public class EditorDeNaoTerminais {
                         || (listaTokens.get(0).getTipoToken() == TipoToken.IDENTIFICADOR)) {
                     analisadorSintatico.getNaoTerminal("operando").executar(listaTokens);
                     analisadorSintatico.getNaoTerminal("compl_termo_aritmetico").executar(listaTokens);
-                } 
-                else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                } else {
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "inteiro ou real ou identificador ou (");
                 }
             }
@@ -1358,7 +1373,7 @@ public class EditorDeNaoTerminais {
                 if (temp.equals("*") || temp.equals("/")) {
                     EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "* ou /");
                 }
             }
@@ -1372,7 +1387,7 @@ public class EditorDeNaoTerminais {
                 if (temp.equals("+") || temp.equals("-")) {
                     EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "+ ou -");
                 }
             }
@@ -1394,12 +1409,11 @@ public class EditorDeNaoTerminais {
                         EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                         analisadorSintatico.getNaoTerminal("exp_logica").executar(listaTokens);
                     } else {
-                        tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                                 ")");
                     }
-                } 
-                else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                } else {
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "inteiro ou real ou identificador ou (");
                 }
             }
@@ -1416,7 +1430,7 @@ public class EditorDeNaoTerminais {
                         || (listaTokens.get(0).getTipoToken() == TipoToken.NUMERO_REAL)) {
                     EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "inteiro ou real ou identificador");
                 }
             }
@@ -1431,7 +1445,7 @@ public class EditorDeNaoTerminais {
                     analisadorSintatico.getNaoTerminal("id").executar(listaTokens);
                     analisadorSintatico.getNaoTerminal("compl_tipo_parametro").executar(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "identificador");
                 }
             }
@@ -1446,7 +1460,7 @@ public class EditorDeNaoTerminais {
                     analisadorSintatico.getNaoTerminal("acesso_var").executar(listaTokens);
                     analisadorSintatico.getNaoTerminal("compl_atribuicao").executar(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "identificador");
                 }
             }
@@ -1463,7 +1477,7 @@ public class EditorDeNaoTerminais {
                 } else if (listaTokens.get(0).getTipoToken() == TipoToken.OPERADOR_ARITMETICO_UNARIO) {
                     EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                 } else {
-                    tratarErros(listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
+                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(),
                             "= ou operador unário");
                 }
             }
