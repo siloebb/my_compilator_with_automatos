@@ -6,7 +6,9 @@
 
 package compiladores.utils;
 
+import compiladores.Token;
 import compiladores.enums.Primitiva;
+import compiladores.enums.TipoToken;
 
 /**
  *
@@ -19,7 +21,7 @@ public class Identificador {
     "char","cadeia","verdadeiro","falso"};
     
     public static Primitiva getPrimitiva(char a){
-        System.out.println("ASCII de "+a+" = "+(int)a);
+//        System.out.println("ASCII de "+a+" = "+(int)a);
         
         if( a >= 48 && a <= 57){
             return  Primitiva.DIGITO;
@@ -52,6 +54,35 @@ public class Identificador {
                 return true;
             }
         }
+        return false;
+    }
+    
+    public static boolean verificarTipoVar(String tipo, Token value){
+        //System.out.println(tipo+"=============="+value.getTipoToken());
+        if(value.getTipoToken() == TipoToken.CADEIA_CONSTANTE){
+            if(tipo.equals("cadeia")){
+                return true;
+            }
+        }
+        
+        if(value.getTipoToken() == TipoToken.NUMERO_INTEIRO){
+            if(tipo.equals("inteiro")){
+                return true;
+            }
+        }
+        
+        if(value.getTipoToken() == TipoToken.NUMERO_REAL){
+            if(tipo.equals("real")){
+                return true;
+            }
+        }
+        
+        if(value.getTipoToken() == TipoToken.CARACTERE_CONSTANTE){
+            if(tipo.equals("char")){
+                return true;
+            }
+        }
+        
         return false;
     }
     

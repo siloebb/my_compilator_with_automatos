@@ -228,7 +228,7 @@ public class FrameMain extends javax.swing.JFrame {
         tableErrosSintaticos.setModel(new ErroSintaticoTableModel(listaErrosSintaticos));
 
         if (listaErros.size() <= 0 && listaErrosSintaticos.size() <=0) {
-            JOptionPane.showMessageDialog(this, "Análise léxica feita com sucesso!", "Sucesso", 
+            JOptionPane.showMessageDialog(this, "Compilado com sucesso!", "Sucesso", 
                     JOptionPane.INFORMATION_MESSAGE);
         } else {
             JOptionPane.showMessageDialog(this, "Análise léxica possui "+listaErros.size()+" erros!\n"

@@ -1,4 +1,4 @@
-
+    
 package compiladores.sintatico;
 
 import compiladores.Token;

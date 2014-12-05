@@ -23,6 +23,7 @@ public class AnalisadorSintatico {
     public void executar() {
         try {
             starter.executar(listaTokens);
+            
         } catch (NullPointerException ex) {
             ex.printStackTrace();
         }

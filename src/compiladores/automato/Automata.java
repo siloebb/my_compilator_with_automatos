@@ -193,7 +193,7 @@ public class Automata {
 
             for (int c = 0; lines.length > c; c++) {
                 String linha = lines[c];
-                System.out.println("Estou na linha " + c);
+//                System.out.println("Estou na linha " + c);
                 int i = 0;
 
                 //Adicionando símbolo de enter
@@ -249,8 +249,8 @@ public class Automata {
                         //Mudando nova origem
                         origin = destiny.getId();
 
-                        System.out.println("Leu o simbolo \" " + charAt + " \" foi para o "
-                                + this.getState(origin).getLabel());
+//                        System.out.println("Leu o simbolo \" " + charAt + " \" foi para o "
+//                                + this.getState(origin).getLabel());
 
                         //reiniciando o armazenador de token
                         if (this.getState(origin).isPrincipal()) {
@@ -268,8 +268,8 @@ public class Automata {
 
                             if (transitionLambda != null) {
                                 origin = transitionLambda.getDestiny().getId();
-                                System.out.println("Transição lambda, passando para estado "
-                                        + this.getState(origin).getLabel());
+//                                System.out.println("Transição lambda, passando para estado "
+//                                        + this.getState(origin).getLabel());
                                 //reiniciando o armazenador de token para lambidas
                                 if (this.getState(origin).isPrincipal()) {
                                     tempToken = "";

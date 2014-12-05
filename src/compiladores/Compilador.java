@@ -72,6 +72,8 @@ public class Compilador {
         listaErrosSintaticos = EditorDeNaoTerminais.setNaoTerminais(analisadorSintatico);
         
         
+        
+        
         analisadorSintatico.setStarter(analisadorSintatico.getListaNaoTerminal().get("lista_registros"));
         analisadorSintatico.executar();
 
