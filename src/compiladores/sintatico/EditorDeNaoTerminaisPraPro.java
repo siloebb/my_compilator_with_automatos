@@ -844,7 +844,7 @@ public class EditorDeNaoTerminaisPraPro {
                 String temp = listaTokens.get(0).getLexema();
                 if (temp.equals("[") || temp.equals(".") || temp.equals("=")) {
                     analisadorSintatico.getNaoTerminal("atribuicao").executar(listaTokens);
-                } else if (listaTokens.get(0).getTipoToken() == TipoToken.IDENTIFICADOR) {
+                } else if (listaTokens.get(0).getLexema().equals("(")) {
                     analisadorSintatico.getNaoTerminal("chamada_funcao").executar(listaTokens);
                     if (listaTokens.get(0).getLexema().equals(";")) {
                         EditorDeNaoTerminaisPraPro.removePrimeiroItemDaLista(listaTokens);

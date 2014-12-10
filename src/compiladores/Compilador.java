@@ -4,6 +4,7 @@ import compiladores.automato.Automata;
 import compiladores.enums.Primitiva;
 import compiladores.enums.TipoErro;
 import compiladores.enums.TipoToken;
+import compiladores.semantico.ErroSemantico;
 import compiladores.sintatico.AnalisadorSintatico;
 import compiladores.sintatico.EditorDeNaoTerminais;
 import compiladores.sintatico.ErroSintatico;
@@ -19,6 +20,7 @@ public class Compilador {
     private Automata automata;
     private ArrayList<Erro> listaErrosLexicos;
     private ArrayList<ErroSintatico> listaErrosSintaticos;
+    private ArrayList<ErroSemantico> listaErrosSemanticos;
     private ArrayList<Token> listaTokens;
     private AnalisadorSintatico analisadorSintatico;
 
@@ -72,10 +74,10 @@ public class Compilador {
         listaErrosSintaticos = EditorDeNaoTerminais.setNaoTerminais(analisadorSintatico);
         
         
-        
-        
         analisadorSintatico.setStarter(analisadorSintatico.getListaNaoTerminal().get("lista_registros"));
         analisadorSintatico.executar();
+        
+        listaErrosSemanticos = EditorDeNaoTerminais.getListaErrosSemanticos();
 
     }
 
@@ -97,6 +99,10 @@ public class Compilador {
         return listaErrosSintaticos;
     }
 
+    public ArrayList<ErroSemantico> getListaErrosSemanticos() {
+        return listaErrosSemanticos;
+    }
+            
     public void setListaTokens(ArrayList<Token> listaTokens) {
         this.listaTokens = listaTokens;
     }

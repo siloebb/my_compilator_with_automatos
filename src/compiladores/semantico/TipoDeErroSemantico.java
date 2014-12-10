@@ -1,5 +1,5 @@
 
-package compiladores.sintatico;
+package compiladores.semantico;
 
 /**
  *

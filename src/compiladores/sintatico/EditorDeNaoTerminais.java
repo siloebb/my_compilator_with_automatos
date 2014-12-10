@@ -1,5 +1,6 @@
 package compiladores.sintatico;
 
+import compiladores.semantico.TipoDeErroSemantico;
 import compiladores.Token;
 import compiladores.enums.TipoToken;
 import compiladores.semantico.CampoRegistro;
@@ -29,7 +30,7 @@ public class EditorDeNaoTerminais {
 
     public static void reportarErroSemantico(TipoDeErroSemantico erro, int linha) {
         ErroSemantico es = new ErroSemantico(erro, linha);
-        System.out.println("ERRO SEMANTICO: " + erro + ", linha: " + linha);
+        listaErrosSemanticos.add(es);
     }
 
     public static void reportarVariaveis(String tipo, String nome, int linha) {
@@ -135,6 +136,7 @@ public class EditorDeNaoTerminais {
 
     public static ArrayList<ErroSintatico> setNaoTerminais(final AnalisadorSintatico analisadorSintatico) {
         listaErros = new ArrayList<>();
+        listaErrosSemanticos = new ArrayList<ErroSemantico>();
         listaRegistro = new ArrayList<>();
         listaFuncao = new ArrayList<>();
         listaVariavel = new ArrayList<>();
@@ -595,6 +597,22 @@ public class EditorDeNaoTerminais {
                 //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                 String temp = listaTokens.get(0).getLexema();
                 if ((listaTokens.get(0).getTipoToken() == TipoToken.IDENTIFICADOR)) {
+
+//                    if (listaTokens.get(1).getLexema().equals(".")
+//                            || listaTokens.get(1).getLexema().equals(".")) {
+                    boolean exist = false;
+                    for (Variavel var : listaVariavel) {
+                        if (var.getNome().equals(listaTokens.get(0).getLexema())) {
+                            exist = true;
+                            break;
+                        }
+                    }
+                    if (!exist) {
+                        reportarErroSemantico(TipoDeErroSemantico.VARIAVEL_NAO_DECLARADA,
+                                listaTokens.get(0).getLinha());
+                    }
+//                    }
+
                     analisadorSintatico.getNaoTerminal("id").executar(listaTokens);
                     analisadorSintatico.getNaoTerminal("compl_tipo_parametro").executar(listaTokens);
                 } else {
@@ -936,30 +954,29 @@ public class EditorDeNaoTerminais {
             }
         }));
 
-        analisadorSintatico.addNaoTerminal(new NaoTerminal("algoritmo", new ExecutorNaoTerminal() {
-            @Override
-            public void executarLeitura(ArrayList<Token> listaTokens) {
-                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
-                String temp = listaTokens.get(0).getLexema();
-                if (temp.equals("algoritimo")) {
-                    EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
-                    if (listaTokens.get(0).getLexema().equals("{")) {
-                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
-                    } else {
-                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "{");
-                    }
-                    analisadorSintatico.getNaoTerminal("corpo").executar(listaTokens);
-                    if (listaTokens.get(0).getLexema().equals("}")) {
-                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
-                    } else {
-                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "}");
-                    }
-                } else {
-                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "algoritimo");
-                }
-            }
-        }));
-
+//        analisadorSintatico.addNaoTerminal(new NaoTerminal("algoritmo", new ExecutorNaoTerminal() {
+//            @Override
+//            public void executarLeitura(ArrayList<Token> listaTokens) {
+//                //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+//                String temp = listaTokens.get(0).getLexema();
+//                if (temp.equals("algoritimo")) {
+//                    EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+//                    if (listaTokens.get(0).getLexema().equals("{")) {
+//                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+//                    } else {
+//                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "{");
+//                    }
+//                    analisadorSintatico.getNaoTerminal("corpo").executar(listaTokens);
+//                    if (listaTokens.get(0).getLexema().equals("}")) {
+//                        EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
+//                    } else {
+//                        tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "}");
+//                    }
+//                } else {
+//                    tratarErros(listaTokens, listaTokens.get(0).getLinha(), listaTokens.get(0).getLexema(), "algoritimo");
+//                }
+//            }
+//        }));
         analisadorSintatico.addNaoTerminal(new NaoTerminal("algoritimo", new ExecutorNaoTerminal() {
             @Override
             public void executarLeitura(ArrayList<Token> listaTokens) {
@@ -1024,7 +1041,7 @@ public class EditorDeNaoTerminais {
                             for (Variavel var : listaVariavel) {
                                 if (var.getNome().equals(listaTokens.get(0).getLexema())) {
                                     exist = true;
-                                    tokenLeft =var;
+                                    tokenLeft = var;
                                     break;
                                 }
                             }
@@ -1055,11 +1072,10 @@ public class EditorDeNaoTerminais {
 
                                             //verificando se a variavel eh do mesmo tipo da var da esquerda
                                             if (tokenLeft != null) {
-                                                if (var.getTipo()
-                                                        != tokenLeft.getTipo()) {
+                                                if (!var.getTipo().equals(tokenLeft.getTipo())) {
                                                     reportarErroSemantico(
                                                             TipoDeErroSemantico.ATRIBUICAO_ENTRE_TIPOS_DIFERENTES,
-                                                            listaTokens.get(0).getLinha());
+                                                            listaTokens.get(count + count2).getLinha());
                                                 }
                                             }
 
@@ -1071,15 +1087,74 @@ public class EditorDeNaoTerminais {
                                         reportarErroSemantico(TipoDeErroSemantico.VARIAVEL_NAO_DECLARADA,
                                                 listaTokens.get(0).getLinha());
                                     }
+                                } else if ((listaTokens.get(count + count2).getTipoToken()
+                                        == TipoToken.NUMERO_INTEIRO)
+                                        || (listaTokens.get(count + count2).getTipoToken()
+                                        == TipoToken.NUMERO_REAL)
+                                        || (listaTokens.get(count + count2).getTipoToken()
+                                        == TipoToken.CARACTERE_CONSTANTE)
+                                        || (listaTokens.get(count + count2).getTipoToken()
+                                        == TipoToken.CADEIA_CONSTANTE)) {
+                                    if (!Identificador.verificarTipoVar(tokenLeft.getTipo(),
+                                            listaTokens.get(count + count2))) {
+                                        reportarErroSemantico(
+                                                TipoDeErroSemantico.ATRIBUICAO_ENTRE_TIPOS_DIFERENTES,
+                                                listaTokens.get(count + count2).getLinha());
+                                    }
+
                                 }
 
                                 count2++;
                             }
 
-//                            if (!verificadorDeclarado) {
-//                                reportarErroSemantico(TipoDeErroSemantico.ATRIBUICAO_ENTRE_TIPOS_DIFERENTES,
-//                                        listaTokens.get(0).getLinha());
-//                            }
+                        } else {
+                            //Tratando erros semânticos de função
+                            Funcao funcao = null;
+                            boolean exist = false;
+                            for (Funcao func : listaFuncao) {
+                                if (func.getNome().equals(listaTokens.get(0).getLexema())) {
+                                    funcao = func;
+                                    exist = true;
+                                    break;
+                                }
+                            }
+
+                            if (exist) {
+
+                                ArrayList<Variavel> listaVar = new ArrayList<>();
+                                int contador = 2;
+                                while (!listaTokens.get(contador).getLexema().equals(")")) {
+                                    if (!listaTokens.get(contador).equals(",")) {
+
+                                        for (Variavel varEx : listaVariavel) {
+                                            if (varEx.getNome().equals(listaTokens.get(contador).getLexema())) {
+                                                listaVar.add(varEx);
+                                            }
+                                        }
+
+                                    }
+                                    contador++;
+                                }
+
+                                if (funcao.getListaParametro().size() != listaVar.size()) {
+                                    reportarErroSemantico(TipoDeErroSemantico.QUANTIDADE_DE_PARAMETROS_INVALIDA,
+                                            listaTokens.get(0).getLinha());
+                                } else {
+                                    for (int i = 0; i < funcao.getListaParametro().size(); i++) {
+                                        //Se o parametro for diferente
+                                        if (!funcao.getListaParametro().get(0).getTipo().
+                                                equals(listaVar.get(i).getTipo())) {
+                                            reportarErroSemantico(TipoDeErroSemantico.PARAMETRO_TIPO_INVALIDO,
+                                                    listaTokens.get(0).getLinha());
+                                        }
+                                    }
+                                }
+
+                            } else {
+                                reportarErroSemantico(TipoDeErroSemantico.FUNCAO_JA_EXISTENTE,
+                                        listaTokens.get(0).getLinha());
+                            }
+
                         }
                     } catch (Exception ex) {
                         ex.printStackTrace();
@@ -1238,8 +1313,8 @@ public class EditorDeNaoTerminais {
                 if ((listaTokens.get(0).getTipoToken() == TipoToken.CARACTERE_CONSTANTE)
                         || (listaTokens.get(0).getTipoToken() == TipoToken.CADEIA_CONSTANTE)) {
                     EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
-                    analisadorSintatico.getNaoTerminal("arg_escrita").executar(listaTokens);
-                    analisadorSintatico.getNaoTerminal("prox_arg_escrita").executar(listaTokens);
+//                    analisadorSintatico.getNaoTerminal("arg_escrita").executar(listaTokens);
+//                    analisadorSintatico.getNaoTerminal("prox_arg_escrita").executar(listaTokens);
                 } else if (listaTokens.get(0).getTipoToken() == TipoToken.IDENTIFICADOR) {
                     analisadorSintatico.getNaoTerminal("argumento").executar(listaTokens);
                 } else {
@@ -1587,6 +1662,52 @@ public class EditorDeNaoTerminais {
                         || (listaTokens.get(0).getTipoToken() == TipoToken.NUMERO_INTEIRO)
                         || (listaTokens.get(0).getTipoToken() == TipoToken.NUMERO_REAL)
                         || (listaTokens.get(0).getTipoToken() == TipoToken.IDENTIFICADOR)) {
+
+                    String tempTipo = "";
+                    for (int i = 1;
+                            i < listaTokens.size()
+                            && !listaTokens.get(i).getLexema().equals(";"); i++) {
+                        if (listaTokens.get(i).getLexema().equals(",")) {
+                            break;
+                        }
+
+                        if (listaTokens.get(i).getTipoToken() != TipoToken.OPERADOR_RELACIONAL) {
+
+                            Variavel var = null;
+                            buscaVar:
+                            for (Variavel v : listaVariavel) {
+                                if (v.getNome().equals(listaTokens.get(i).getLexema())) {
+                                    var = v;
+                                    break buscaVar;
+                                }
+                            }
+
+                            //Se não achou a váriavel
+                            if (var != null) {
+                                if (tempTipo.equals("")) {
+                                    //caso seja o primeiro item da operação
+                                    tempTipo = var.getTipo();
+                                } else {
+                                    //caso não seja o primeiro item da operação
+                                    if (var.getTipo().equals(tempTipo)) {
+                                        tempTipo = var.getTipo();
+                                    } else {
+                                        reportarErroSemantico(TipoDeErroSemantico.OPERACAO_ENTRE_TIPOS_DIFERENTES,
+                                                listaTokens.get(i).getLinha());
+                                    }
+                                }
+                            } else {
+                                if (listaTokens.get(i).getTipoToken() == TipoToken.IDENTIFICADOR) {
+                                    //Não precisa
+                                    //reportarErroSemantico(TipoDeErroSemantico.VARIAVEL_NAO_DECLARADA, 
+                                    // listaTokens.get(i).getLinha());
+                                }
+
+                            }
+                        }
+
+                    }
+
                     analisadorSintatico.getNaoTerminal("termo_aritmetico").executar(listaTokens);
                     analisadorSintatico.getNaoTerminal("compl_exp_arit").executar(listaTokens);
                 } else {
@@ -1718,6 +1839,19 @@ public class EditorDeNaoTerminais {
                 //EditorDeNaoTerminais.removePrimeiroItemDaLista(listaTokens);
                 String temp = listaTokens.get(0).getLexema();
                 if (listaTokens.get(0).getTipoToken() == TipoToken.IDENTIFICADOR) {
+
+                    boolean exist = false;
+                    for (Variavel var : listaVariavel) {
+                        if (var.getNome().equals(listaTokens.get(0).getLexema())) {
+                            exist = true;
+                            break;
+                        }
+                    }
+                    if (!exist) {
+                        reportarErroSemantico(TipoDeErroSemantico.VARIAVEL_NAO_DECLARADA,
+                                listaTokens.get(0).getLinha());
+                    }
+
                     analisadorSintatico.getNaoTerminal("id").executar(listaTokens);
                     analisadorSintatico.getNaoTerminal("compl_tipo_parametro").executar(listaTokens);
                 } else {
@@ -1770,6 +1904,10 @@ public class EditorDeNaoTerminais {
 
     public static void reportarErroSintatico() {
 
+    }
+
+    public static ArrayList<ErroSemantico> getListaErrosSemanticos() {
+        return listaErrosSemanticos;
     }
 
 }

@@ -1,7 +1,5 @@
 package compiladores.semantico;
 
-import compiladores.sintatico.TipoDeErroSemantico;
-
 /**
  *
  * @author Siloé
