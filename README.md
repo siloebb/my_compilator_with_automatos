@@ -1,5 +1,5 @@
-# my_compilator_with_automatos
-Um compilador de uma linguagem criada com alunos da UEFS
+# My compilator with automatons
+A compiler of a language created in UEFS for my PBL
 
 
 
